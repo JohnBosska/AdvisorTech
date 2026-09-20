@@ -1,0 +1,6 @@
+services:
+  api:
+    build: .
+    container_name: salon-booking-api
+    ports:
+      - "8000:8000"
