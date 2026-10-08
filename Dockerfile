@@ -11,7 +11,9 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev --no-cache
 
 COPY app ./app
+COPY cmd ./cmd
+COPY app.py temporal_entry.py alembic.ini ./
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["bash", "cmd/run_app.sh"]

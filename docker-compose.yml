@@ -8,11 +8,51 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-salon_booking}
       POSTGRES_USER: ${POSTGRES_USER:-salon_booking}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_TASK_QUEUE: salon-booking-email
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-}
+      AUTH_ACCESS_TOKEN_TTL_SECONDS: ${AUTH_ACCESS_TOKEN_TTL_SECONDS:-1800}
+      AUTH_EMAIL_VERIFICATION_TTL_SECONDS: ${AUTH_EMAIL_VERIFICATION_TTL_SECONDS:-600}
+      AUTH_EMAIL_VERIFICATION_MAX_ATTEMPTS: ${AUTH_EMAIL_VERIFICATION_MAX_ATTEMPTS:-5}
+      AUTH_EMAIL_VERIFICATION_RESEND_SECONDS: ${AUTH_EMAIL_VERIFICATION_RESEND_SECONDS:-60}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CLIENT_ID: ${TELEGRAM_CLIENT_ID:-}
+      TELEGRAM_AUTH_DATA_MAX_AGE_SECONDS: ${TELEGRAM_AUTH_DATA_MAX_AGE_SECONDS:-300}
     ports:
       - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
+
+  temporal:
+    image: temporalio/temporal:latest
+    container_name: salon-booking-temporal
+    command: ["server", "start-dev", "--ip", "0.0.0.0"]
+    ports:
+      - "7233:7233"
+      - "8233:8233"
+    restart: unless-stopped
+
+  temporal-worker:
+    build: .
+    container_name: salon-booking-temporal-worker
+    command: ["bash", "cmd/run_worker.sh"]
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_NAMESPACE: default
+      TEMPORAL_TASK_QUEUE: salon-booking-email
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USERNAME: ${EMAIL_USERNAME:-}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+      EMAIL_SENDER: ${EMAIL_SENDER:-}
+      EMAIL_START_TLS: ${EMAIL_START_TLS:-true}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-false}
+    depends_on:
+      temporal:
+        condition: service_started
+    restart: unless-stopped
 
   postgres:
     image: postgres:18

@@ -1,0 +1,61 @@
+import argparse
+import os
+from contextlib import asynccontextmanager
+
+import uvicorn
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+
+from app.config.logging import configure_logging
+from app.data_layer.alchemy.api_db import engine
+from app.exception_handlers import (
+    handle_api_error,
+    handle_auth_configuration_error,
+    handle_unexpected_error,
+    handle_validation_error,
+)
+from app.exceptions import APIError, AuthConfigurationError
+from app.middleware import RequestContextMiddleware
+from app.routers.auth import router as auth_router
+
+configure_logging()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    try:
+        yield
+    finally:
+        await engine.dispose()
+
+
+app = FastAPI(
+    title="Salon Booking API",
+    version="0.2.0",
+    lifespan=lifespan,
+    exception_handlers={
+        APIError: handle_api_error,
+        AuthConfigurationError: handle_auth_configuration_error,
+        RequestValidationError: handle_validation_error,
+        Exception: handle_unexpected_error,
+    },
+)
+app.add_middleware(RequestContextMiddleware)
+app.include_router(auth_router, prefix="/api/v1")
+
+
+@app.get("/health", tags=["System"])
+def health_check():
+    return {"status": "ok"}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Salon Booking API")
+    parser.add_argument("--host", default=os.getenv("HOST", "0.0.0.0"))
+    parser.add_argument("--port", type=int, default=os.getenv("PORT", "8000"))
+    args = parser.parse_args()
+    uvicorn.run(app, host=args.host, port=args.port)
+
+
+if __name__ == "__main__":
+    main()

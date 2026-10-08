@@ -7,7 +7,7 @@
 
 ```bash
 uv sync --locked
-uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uv run bash cmd/run_app.sh
 ```
 
 Swagger UI: http://localhost:8000/docs. Проверка сервиса: http://localhost:8000/health.
@@ -40,8 +40,19 @@ cp .env.example .env
 docker compose up --build
 ```
 
+Compose запускает API, PostgreSQL, Temporal dev server и отдельный Temporal worker.
+API доступен на порту 8000, Temporal UI — на порту 8233. Для отправки email
+задайте `EMAIL_HOST`, `EMAIL_USERNAME`, `EMAIL_PASSWORD` и `EMAIL_SENDER` в `.env`.
+Temporal dev server хранит историю в памяти и предназначен только для локальной
+разработки.
+Для разработки worker можно запустить отдельно: `uv run bash cmd/run_worker.sh`.
+Вход поддерживает `POST /api/v1/auth/email/register`, `POST /api/v1/auth/email/login`,
+`POST /api/v1/auth/telegram/oauth` и `POST /api/v1/auth/telegram/webapp`; успешный
+вход возвращает JWT. Текущий пользователь доступен через `GET /api/v1/auth/me`.
+Для JWT задайте `AUTH_JWT_SECRET`, для Telegram — `TELEGRAM_BOT_TOKEN` и
+`TELEGRAM_CLIENT_ID`.
+
 Docker устанавливает зависимости из `uv.lock` через `uv sync --locked --no-dev`.
-Сервис доступен на порту 8000.
 
 ## PostgreSQL 18
 
@@ -67,5 +78,36 @@ docker compose exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -
 Переменные `POSTGRES_*` применяются при инициализации пустого тома;
 изменение `.env` не меняет пользователей и пароли существующей базы.
 
-API пока использует хранилище в памяти. Async-подключение SQLAlchemy и Alembic
-настроены; ORM-модели предметной области и первая миграция ещё не добавлены.
+Авторизация использует PostgreSQL через async SQLAlchemy.
+Для новой базы примените миграции: `uv run alembic upgrade head`
+(в Docker: `docker compose run --rm api alembic upgrade head`).
+Если таблицы уже создавались вручную, сначала сравните их с `0001_user_identities`:
+первичная миграция не предназначена для запуска поверх существующих таблиц.
+
+## Подтверждение email
+
+1. `POST /api/v1/auth/email/register` с `email`, `password`, необязательным `name`
+   создаёт пользователя и ставит письмо в очередь Temporal. Ответ `201`:
+   `{"detail": "Email verification required"}`. JWT пока не выдаётся.
+2. `POST /api/v1/auth/email/verify` с `email`, `password`, `code` подтверждает
+   адрес и возвращает JWT. Код — строка из 8 цифр, действителен 10 минут,
+   допускает 5 неверных попыток. Использованный код повторно не принимается.
+3. `POST /api/v1/auth/email/resend` с `email`, `password` выдаёт новый код,
+   аннулируя предыдущий. Ответ `202`; повторный запрос раньше 60 секунд
+   возвращает `429` с `Retry-After`.
+
+До подтверждения вход по email возвращает `403`. Существующие адреса после
+миграции также считаются неподтверждёнными: запросите код через `/email/resend`.
+Неверный/просроченный код возвращает `400`, неверный пароль — `401`.
+Коды не возвращаются в API; в БД хранится HMAC-хеш.
+
+Для писем должны работать Temporal server, worker и SMTP. Ответ регистрации
+подтверждает постановку письма в очередь, а не доставку. Если постановка
+не удалась, API возвращает `503`; аккаунт остаётся созданным, код можно
+запросить повторно через `/email/resend` после истечения интервала.
+Сбой процесса между commit и постановкой письма также требует повторного
+запроса; транзакционного outbox пока нет.
+
+Транзакции записи открываются явно в resources через `SessionFactory.begin()`:
+успешный выход делает commit, исключение — rollback. Методы моделей выполняют
+только запросы и flush; сессия передаётся им аргументом.
