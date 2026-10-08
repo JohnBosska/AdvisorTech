@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
+from typing import Self
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
-class Base(DeclarativeBase):
+class BaseModel(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
     created_at: Mapped[datetime] = mapped_column(
         default=lambda: datetime.now(timezone.utc),
@@ -27,7 +28,7 @@ class Base(DeclarativeBase):
         return True
 
     @classmethod
-    async def get_by_id(cls, session: AsyncSession, object_id: int) -> Base | None:
+    async def get_by_id(cls, session: AsyncSession, object_id: int) -> Self | None:
         result = await session.execute(
             select(cls).where(cls.id == object_id, cls.is_deleted.is_(False))
         )
