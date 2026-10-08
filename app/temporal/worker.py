@@ -1,0 +1,20 @@
+from temporalio.client import Client
+from temporalio.worker import Worker
+
+from app.config.temporal import temporal
+from app.temporal.activities.email import send_email
+from app.temporal.workflows.email import SendEmailWorkflow
+
+
+async def run_worker() -> None:
+    client = await Client.connect(
+        temporal.address,
+        namespace=temporal.namespace,
+    )
+    worker = Worker(
+        client,
+        task_queue=temporal.task_queue,
+        workflows=[SendEmailWorkflow],
+        activities=[send_email],
+    )
+    await worker.run()

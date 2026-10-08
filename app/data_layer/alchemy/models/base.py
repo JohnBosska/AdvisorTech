@@ -17,14 +17,18 @@ class BaseModel(DeclarativeBase):
     )
     is_deleted: Mapped[bool] = mapped_column(default=False)
 
+    async def save(self, session: AsyncSession) -> Self:
+        session.add(self)
+        await session.flush()
+        return self
+
     @classmethod
     async def delete(cls, session: AsyncSession, object_id: int) -> bool:
         instance = await cls.get_by_id(session, object_id)
         if instance is None:
             return False
-
         instance.is_deleted = True
-        await session.flush()
+        await instance.save(session)
         return True
 
     @classmethod

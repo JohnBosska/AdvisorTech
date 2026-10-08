@@ -1,4 +1,4 @@
-from .api_db import get_session as get_session
+from .api_db import SessionFactory as SessionFactory
 from .models import Base as Base
 
-__all__ = ["Base", "get_session"]
+__all__ = ["Base", "SessionFactory"]
