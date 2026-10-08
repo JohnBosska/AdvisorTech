@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
@@ -8,6 +10,14 @@ from app.routers.admin import catalog as admin_catalog
 from app.routers.admin import integration_1c as admin_integration_1c
 from app.routers.admin import notifications as admin_notifications
 from app.routers.admin import stats as admin_stats
+from app.data_layer.alchemy.base import engine
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    yield
+    await engine.dispose()
+
 
 tags_metadata = [
     {"name": "Catalog", "description": "Просмотр локаций, услуг и мест (кресла/зоны) — доступно клиенту."},
@@ -53,6 +63,7 @@ app = FastAPI(
     version="0.2.0",
     openapi_tags=tags_metadata,
     docs_url=None,
+    lifespan=lifespan,
 )
 
 # Swagger UI по умолчанию не задаёт фон страницы, поэтому в браузере с тёмной
