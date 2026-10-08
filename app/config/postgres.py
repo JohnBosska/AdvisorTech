@@ -1,5 +1,5 @@
-from pydantic_settings import BaseSettings
 from pydantic import AliasChoices, Field, PostgresDsn
+from pydantic_settings import BaseSettings
 
 
 class AlchemyConf(BaseSettings):

@@ -7,7 +7,7 @@
 
 ```bash
 uv sync --locked
-uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Swagger UI: http://localhost:8000/docs. Проверка сервиса: http://localhost:8000/health.
@@ -67,5 +67,5 @@ docker compose exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -
 Переменные `POSTGRES_*` применяются при инициализации пустого тома;
 изменение `.env` не меняет пользователей и пароли существующей базы.
 
-API пока использует хранилище в памяти (`app/storage.py`); перенос данных
-в PostgreSQL и миграции ещё не реализованы.
+API пока использует хранилище в памяти. Async-подключение SQLAlchemy и Alembic
+настроены; ORM-модели предметной области и первая миграция ещё не добавлены.

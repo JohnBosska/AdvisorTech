@@ -2,15 +2,15 @@
 
 ## Project Structure & Module Organization
 
-`app/` contains the FastAPI service. `app/main.py` creates the application; `app/routers/` defines public and admin endpoints; `app/schemas/` holds request and response models; and `app/config/`, `app/data_layer/`, `app/resources/`, and `app/utils/` contain configuration and supporting code. `app/schemas.py` is the current consolidated schema module. `migrations/` is reserved for database migrations; PostgreSQL is available in Compose, but API persistence is currently in memory. There is no checked-in test or asset directory yet.
+`app/` contains the FastAPI service package, and root `main.py` creates the application; `app/routers/` defines public and admin endpoints; `app/schemas/` holds API schemas; and `app/config/`, `app/data_layer/`, `app/long_tasks/`, `app/middleware/`, `app/resources/`, `app/services/`, and `app/utils/` contain supporting code. SQLAlchemy connection/session setup lives in `app/data_layer/alchemy/api_db.py`, shared ORM models in `app/data_layer/alchemy/models/`, and Alembic migrations in `app/data_layer/alchemy/migrations/`. Temporal workflows, activities, and workers belong in `app/long_tasks/`. PostgreSQL is available in Compose; API persistence is being moved from in-memory storage. There is no checked-in test or asset directory yet.
 
 ## Build, Test, and Development Commands
 
-Use Python 3.14 and `uv` for dependency management. Run `uv sync --locked` to install the locked environment, then `uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000` to serve locally. Browse `/docs` for Swagger UI and `/health` for the health endpoint. Run `docker compose up --build` for the API and PostgreSQL stack; `docker compose up -d --wait postgres` starts only the database. Add or remove dependencies with `uv add <package>` and `uv remove <package>`, and commit corresponding `pyproject.toml` and `uv.lock` changes together.
+Use Python 3.14 and `uv` for dependency management. Run `uv sync --locked` to install the locked environment, then `uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000` to serve locally. Browse `/docs` for Swagger UI and `/health` for the health endpoint. Run `docker compose up --build` for the API and PostgreSQL stack; `docker compose up -d --wait postgres` starts only the database. Add or remove dependencies with `uv add <package>` and `uv remove <package>`, and commit corresponding `pyproject.toml` and `uv.lock` changes together.
 
 ## Coding Style & Naming Conventions
 
-Follow standard Python style: four-space indentation, `snake_case` for modules, functions, and variables, and `PascalCase` for classes and Pydantic models. Keep routers grouped by domain under `app/routers/`, with admin endpoints under `app/routers/admin/`. Use typed function signatures and explicit Pydantic request/response models for API contracts. No formatter or linter configuration is currently checked in; keep changes consistent with nearby code.
+Follow standard Python style: four-space indentation, `snake_case` for modules, functions, and variables, and `PascalCase` for classes and Pydantic models. Keep routers grouped by domain under `app/routers/`, with admin endpoints under `app/routers/admin/`. Use typed function signatures and explicit Pydantic request/response models for API contracts. Ruff is configured in `pyproject.toml`; run `uv run ruff check .` before submitting changes.
 
 ## Testing Guidelines
 
@@ -23,3 +23,16 @@ Recent commits use short imperative subjects, often with a Conventional Commit t
 ## Security & Configuration
 
 Copy `.env.example` to `.env` for local secrets and database settings; never commit real credentials. Treat `POSTGRES_*` values as initialization settings for a fresh database volume. Avoid `docker compose down -v` unless deleting local database data is intentional.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
