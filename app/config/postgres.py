@@ -1,13 +1,19 @@
 from pydantic_settings import BaseSettings
-from pydantic import PostgresDsn
+from pydantic import AliasChoices, Field, PostgresDsn
 
 
 class AlchemyConf(BaseSettings):
     host: str = "localhost"
     port: int = 5432
-    username: str = "salon_booking"
+    username: str = Field(
+        default="salon_booking",
+        validation_alias=AliasChoices("POSTGRES_USER", "POSTGRES_USERNAME"),
+    )
     password: str = ""
-    database: str = "salon_booking"
+    database: str = Field(
+        default="salon_booking",
+        validation_alias=AliasChoices("POSTGRES_DB", "POSTGRES_DATABASE"),
+    )
     pool_size: int = 10
     max_overflow: int = 50
     pool_timeout: int = 30
