@@ -50,3 +50,32 @@ def test_context_blocks_neutralise_quotes_in_titles() -> None:
     block = render_context([Passage(1, 1, 'Регламент "А"', "текст", ref=1)])
     assert '<source id="1" title="Регламент \'А\'">' in block
     assert "Данные из 1С" in NO_CONTEXT_ANSWER
+
+
+from app.utils.rag import validate_answer  # noqa: E402
+
+
+def _passages() -> list[Passage]:
+    return [
+        Passage(
+            1, 1, "Регламент", "Скидка выше 10% требует согласования. Лимит 1 500 000 руб.", ref=1
+        )
+    ]
+
+
+def test_validation_accepts_supported_answer() -> None:
+    status, summary = validate_answer(
+        "Скидка выше 10% согласуется [1]. Лимит 1 500 000 руб. [1]", _passages()
+    )
+    assert status == "completed", summary
+
+
+def test_validation_flags_missing_and_unknown_citations() -> None:
+    assert validate_answer("Скидки согласуются.", _passages())[0] == "warning"
+    status, summary = validate_answer("Скидки согласуются [7].", _passages())
+    assert status == "warning" and "[7]" in summary
+
+
+def test_validation_flags_numbers_that_are_not_in_sources() -> None:
+    status, summary = validate_answer("Маржа снизилась на 4.2 процентного пункта [1].", _passages())
+    assert status == "warning" and "4.2" in summary

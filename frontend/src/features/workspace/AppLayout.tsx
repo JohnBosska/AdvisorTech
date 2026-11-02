@@ -1,5 +1,5 @@
 import { BarChart3, Bot, Boxes, Cable, CreditCard, Database, FileBarChart, FileSpreadsheet, LayoutDashboard, LogOut, PanelLeftClose, PanelLeftOpen, Settings, Truck } from 'lucide-react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { DemoBadge } from '../../components/feedback/Feedback'
 import { LogoMark, Wordmark } from '../../components/navigation/Wordmark'
 import { PeriodSelector } from '../../components/navigation/PeriodSelector'
@@ -27,6 +27,7 @@ export function AppLayout() {
   const { user, signOut } = useAuth()
   const { organization } = useActiveOrganization()
   const { sidebarCollapsed, toggleSidebar } = useUi()
+  const fullBleed = useLocation().pathname.startsWith('/app/ai-analyst')
 
   return (
     <div className="flex min-h-screen">
@@ -66,7 +67,7 @@ export function AppLayout() {
             <NavLink key={to} to={to} end={end} className={({ isActive }) => `whitespace-nowrap rounded-full px-3 py-1 text-xs ${isActive ? 'bg-surface-3 text-accent' : 'text-muted'}`}>{label}</NavLink>
           ))}
         </nav>
-        <main className="mx-auto w-full max-w-[1280px] flex-1 p-4 sm:p-6"><Outlet /></main>
+        <main className={fullBleed ? 'w-full flex-1' : 'mx-auto w-full max-w-[1280px] flex-1 p-4 sm:p-6'}><Outlet /></main>
       </div>
     </div>
   )

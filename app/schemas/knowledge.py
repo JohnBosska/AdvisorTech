@@ -49,6 +49,15 @@ class SourceResponse(BaseModel):
     document_id: int
     title: str
     snippet: str
+    uploaded_at: str | None = None
+
+
+class StageResponse(BaseModel):
+    id: str
+    status: str  # idle | running | completed | warning | failed | skipped
+    summary: str | None = None
+    duration_ms: int | None = None
+    count: int | None = None
 
 
 class MessageResponse(BaseModel):
@@ -59,6 +68,9 @@ class MessageResponse(BaseModel):
     content: str
     sources: list[SourceResponse]
     refusal: bool
+    trace: list[StageResponse] = []
+    duration_ms: int | None = None
+    model: str | None = None
     created_at: datetime
 
 

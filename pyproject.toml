@@ -21,6 +21,7 @@ dependencies = [
     "anthropic>=2.3.0",
     "pgvector>=0.5.1",
     "certifi>=2026.10.23",
+    "openpyxl>=3.1.5",
 ]
 
 [tool.uv]

@@ -142,38 +142,43 @@ class KnowledgeBase:
                 raise ObjectNotFoundError("Document not found")
 
     @staticmethod
-    async def retrieve(organization_id: int, question: str) -> list[Passage]:
-        """Top passages for one organization: full-text, fused with vector hits when available."""
-        rankings: list[list[int]] = []
+    async def fulltext_ids(organization_id: int, question: str) -> list[int]:
         query = build_or_tsquery(question)
+        if not query:
+            return []
         async with SessionFactory() as session:
-            if query:
-                rows = await session.execute(
-                    _FTS_SQL, {"org": organization_id, "q": query, "limit": ai.top_k * 2}
-                )
-                rankings.append([row[0] for row in rows])
+            rows = await session.execute(
+                _FTS_SQL, {"org": organization_id, "q": query, "limit": ai.top_k * 2}
+            )
+            return [row[0] for row in rows]
 
-            if ai.vector_configured:
-                try:
-                    vector = (await embeddings.embed([question], input_type="query"))[0]
-                    rows = await session.execute(
-                        _VECTOR_SQL,
-                        {
-                            "org": organization_id,
-                            "vec": "[" + ",".join(f"{x:.7f}" for x in vector) + "]",
-                            "limit": ai.top_k * 2,
-                        },
-                    )
-                    rankings.append([row[0] for row in rows])
-                except Exception:
-                    logger.exception("vector search failed; using full-text results only")
+    @staticmethod
+    async def vector_ids(organization_id: int, question: str) -> list[int]:
+        """Raises on provider/DB errors: the caller decides how to degrade."""
+        vector = (await embeddings.embed([question], input_type="query"))[0]
+        async with SessionFactory() as session:
+            rows = await session.execute(
+                _VECTOR_SQL,
+                {
+                    "org": organization_id,
+                    "vec": "[" + ",".join(f"{x:.7f}" for x in vector) + "]",
+                    "limit": ai.top_k * 2,
+                },
+            )
+            return [row[0] for row in rows]
 
-            ids = reciprocal_rank_fusion([r for r in rankings if r])[: ai.top_k]
-            if not ids:
-                return []
-            # Re-check the tenant in SQL: ids from any index are never trusted on their own.
+    @staticmethod
+    def rerank(rankings: list[list[int]]) -> list[int]:
+        return reciprocal_rank_fusion([r for r in rankings if r])[: ai.top_k]
+
+    @staticmethod
+    async def load_passages(organization_id: int, ids: list[int]) -> list[Passage]:
+        """Chunks by id. The tenant is re-checked in SQL: ids from any index are never trusted."""
+        if not ids:
+            return []
+        async with SessionFactory() as session:
             result = await session.execute(
-                select(KnowledgeChunk, KnowledgeDocument.title)
+                select(KnowledgeChunk, KnowledgeDocument.title, KnowledgeDocument.created_at)
                 .join(KnowledgeDocument, KnowledgeDocument.id == KnowledgeChunk.document_id)
                 .where(
                     KnowledgeChunk.id.in_(ids),
@@ -182,11 +187,11 @@ class KnowledgeBase:
                     KnowledgeDocument.is_deleted.is_(False),
                 )
             )
-            by_id = {chunk.id: (chunk, title) for chunk, title in result.all()}
+            by_id = {c.id: (c, title, created) for c, title, created in result.all()}
         passages: list[Passage] = []
         for chunk_id in ids:
             if chunk_id in by_id:
-                chunk, title = by_id[chunk_id]
+                chunk, title, created = by_id[chunk_id]
                 passages.append(
                     Passage(
                         chunk_id=chunk.id,
@@ -194,6 +199,18 @@ class KnowledgeBase:
                         title=title,
                         text=chunk.text,
                         ref=len(passages) + 1,
+                        uploaded_at=created.isoformat(),
                     )
                 )
         return passages
+
+    @staticmethod
+    async def retrieve(organization_id: int, question: str) -> list[Passage]:
+        """Top passages for one organization: full-text fused with vector hits when available."""
+        rankings = [await KnowledgeBase.fulltext_ids(organization_id, question)]
+        if ai.vector_configured:
+            try:
+                rankings.append(await KnowledgeBase.vector_ids(organization_id, question))
+            except Exception:
+                logger.exception("vector search failed; using full-text results only")
+        return await KnowledgeBase.load_passages(organization_id, KnowledgeBase.rerank(rankings))

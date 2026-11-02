@@ -1,11 +1,14 @@
+import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import Response, StreamingResponse
 
 from app.data_layer.alchemy.models import OrganizationMember
 from app.dependencies.organization import get_organization_member
 from app.resources.chat import Chat
 from app.resources.knowledge import KnowledgeBase
+from app.resources.organization import OrganizationEntity
 from app.schemas.knowledge import (
     AIStatusResponse,
     AnswerResponse,
@@ -15,6 +18,7 @@ from app.schemas.knowledge import (
     MessageCreateRequest,
     MessageResponse,
 )
+from app.services.report import build_report
 
 router = APIRouter(prefix="/organizations/{organization_id}", tags=["AI analyst"])
 MemberDep = Annotated[OrganizationMember, Depends(get_organization_member)]
@@ -60,3 +64,35 @@ async def ask(
     organization_id: int, conversation_id: int, payload: MessageCreateRequest, member: MemberDep
 ):
     return await Chat.ask(member, conversation_id, payload.content)
+
+
+@router.post("/chat/conversations/{conversation_id}/messages/stream")
+async def ask_stream(
+    organization_id: int, conversation_id: int, payload: MessageCreateRequest, member: MemberDep
+):
+    """Server-Sent Events: one `stage` event per pipeline change, then `done` (or `error`)."""
+    run = await Chat.prepare(member, conversation_id, payload.content)
+
+    async def events():
+        async for event in Chat.stream(run):
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.get("/chat/conversations/{conversation_id}/messages/{message_id}/report.xlsx")
+async def download_report(
+    organization_id: int, conversation_id: int, message_id: int, member: MemberDep
+):
+    _, answer, question = await Chat.message(member, conversation_id, message_id)
+    organization = await OrganizationEntity.find_for_user(organization_id, member.user_id)
+    data = build_report(question.content if question else "", answer, organization.db_object.name)
+    return Response(
+        data,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="analysis-{message_id}.xlsx"'},
+    )

@@ -156,8 +156,33 @@ def test_chat_answers_with_sources_and_refuses_without_context(monkeypatch) -> N
         system, messages = fake.calls[0]
         assert '<source id="1"' in messages[-1]["content"] and "недоверенные" in system
 
+        trace = {s.id: s for s in answer.assistant_message.trace}
+        assert trace["fulltext_retrieval"].status == "completed"
+        assert trace["vector_retrieval"].status == "skipped"  # no embeddings configured here
+        assert trace["sql_analytics"].status == "skipped"  # no data warehouse
+        assert (
+            trace["llm_generation"].status == "completed"
+            and trace["final_answer"].status == "completed"
+        )
+        assert trace["validation"].status in {"completed", "warning"}
+        assert empty.assistant_message.trace[7].status == "skipped"  # llm_generation on refusal
+
+        events = [
+            e
+            async for e in Chat.stream(
+                await Chat.prepare(owner, conversation.id, "Какая политика скидок?")
+            )
+        ]
+        stage_ids = [e["stage"]["id"] for e in events if e["type"] == "stage"]
+        assert (
+            stage_ids.index("query_analysis")
+            < stage_ids.index("reranking")
+            < stage_ids.index("llm_generation")
+        )
+        assert events[-1]["type"] == "done"
+
         history = await Chat.messages(owner, conversation.id)
-        assert [m.role.value for m in history] == ["USER", "ASSISTANT", "USER", "ASSISTANT"]
+        assert [m.role.value for m in history][:4] == ["USER", "ASSISTANT", "USER", "ASSISTANT"]
         with pytest.raises(ObjectNotFoundError):  # conversations are private to their author
             await Chat.messages(other, conversation.id)
 

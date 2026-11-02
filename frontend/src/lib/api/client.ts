@@ -90,3 +90,85 @@ export function describeApiError(error: unknown): string {
       return 'Ошибка сервера. Попробуйте позже.'
   }
 }
+
+/** Throws ApiError for a non-2xx response (shared by the streaming and download helpers). */
+async function failFrom(response: Response): Promise<never> {
+  let detail = ''
+  try {
+    const payload = (await response.json()) as { detail?: unknown }
+    if (typeof payload.detail === 'string') detail = payload.detail
+  } catch {
+    /* non-JSON error body */
+  }
+  const retry = Number(response.headers.get('Retry-After'))
+  const error = new ApiError(response.status, detail, Number.isFinite(retry) && retry > 0 ? retry : null, response.headers.get('X-Request-ID'))
+  if (response.status === 401) unauthorizedHandler()
+  throw error
+}
+
+function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const token = tokenGetter()
+  return token ? { ...extra, Authorization: `Bearer ${token}` } : extra
+}
+
+/** Parses a Server-Sent Events text buffer; returns complete events and the unread remainder. */
+export function parseSse(buffer: string): { events: unknown[]; rest: string } {
+  const events: unknown[] = []
+  const blocks = buffer.split('\n\n')
+  const rest = blocks.pop() ?? ''
+  for (const block of blocks) {
+    const data = block.split('\n').filter((l) => l.startsWith('data:')).map((l) => l.slice(5).trimStart()).join('\n')
+    if (!data) continue
+    try {
+      events.push(JSON.parse(data))
+    } catch {
+      /* ignore a malformed event */
+    }
+  }
+  return { events, rest }
+}
+
+/** POST that answers with text/event-stream. Resolves when the stream ends. */
+export async function apiStream(path: string, body: unknown, onEvent: (event: unknown) => void, signal?: AbortSignal): Promise<void> {
+  let response: Response
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: authHeaders({ Accept: 'text/event-stream', 'Content-Type': 'application/json' }),
+      body: JSON.stringify(body),
+      signal,
+    })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw error
+    throw new ApiError(0, 'network')
+  }
+  if (!response.ok || !response.body) return failFrom(response)
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  try {
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const parsed = parseSse(buffer)
+      buffer = parsed.rest
+      parsed.events.forEach(onEvent)
+    }
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw error
+    throw new ApiError(0, 'network')
+  }
+}
+
+/** Authenticated file download (the token is a header, so a plain link cannot be used). */
+export async function apiBlob(path: string): Promise<Blob> {
+  let response: Response
+  try {
+    response = await fetch(`${BASE_URL}${path}`, { headers: authHeaders() })
+  } catch {
+    throw new ApiError(0, 'network')
+  }
+  if (!response.ok) return failFrom(response)
+  return response.blob()
+}

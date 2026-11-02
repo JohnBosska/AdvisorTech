@@ -19,6 +19,7 @@ class Passage:
     title: str
     text: str
     ref: int = 0
+    uploaded_at: str = ""  # ISO timestamp of the document, shown as data freshness
 
 
 def split_into_chunks(
@@ -118,3 +119,39 @@ def cited_refs(answer: str, valid: set[int]) -> list[int]:
         if ref in valid and ref not in found:
             found.append(ref)
     return found
+
+
+_NUMBER = re.compile(r"\d[\d\s.,]*\d|\d")
+_ANY_CITATION = re.compile(r"\[(\d{1,3})\]")
+
+
+def _digits(token: str) -> str:
+    return re.sub(r"\D", "", token)
+
+
+def validate_answer(answer: str, passages: list[Passage]) -> tuple[str, str]:
+    """Deterministic post-checks. Returns (status, summary), status is 'completed' or 'warning'.
+
+    Checks: every [N] points at a retrieved source; at least one citation exists; every number in
+    the answer (besides the citation markers) occurs in the retrieved text.
+    """
+    valid = {p.ref for p in passages}
+    issues: list[str] = []
+    cited = [int(m) for m in _ANY_CITATION.findall(answer)]
+    if not cited:
+        issues.append("в ответе нет ссылок на источники")
+    unknown = sorted({c for c in cited if c not in valid})
+    if unknown:
+        issues.append("ссылки на несуществующие источники: " + ", ".join(f"[{c}]" for c in unknown))
+
+    body = _ANY_CITATION.sub(" ", answer)
+    haystack = _digits(" ".join(p.text for p in passages))
+    unsupported = [
+        t.strip() for t in _NUMBER.findall(body) if _digits(t) and _digits(t) not in haystack
+    ]
+    if unsupported:
+        shown = ", ".join(dict.fromkeys(unsupported[:5]))
+        issues.append(f"числа не найдены в источниках: {shown}")
+    if not issues:
+        return "completed", f"Проверено: ссылок {len(set(cited))}, все числа есть в источниках"
+    return "warning", "Требует проверки: " + "; ".join(issues)

@@ -131,6 +131,9 @@ class ChatMessage(BaseModel):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     sources: Mapped[list[dict]] = mapped_column(JSONB, default=list, server_default="[]")
     refusal: Mapped[bool] = mapped_column(default=False, server_default="false")
+    # Execution trace of the run that produced this answer (stages, timings, validation).
+    trace: Mapped[list[dict]] = mapped_column(JSONB, default=list, server_default="[]")
+    duration_ms: Mapped[int | None] = mapped_column()
     model: Mapped[str | None] = mapped_column(String(64))
 
     @classmethod
