@@ -63,7 +63,7 @@ class KnowledgeBase:
             )
         return AIStatusResponse(
             configured=ai.llm_configured,
-            model=ai.model if ai.llm_configured else None,
+            model=ai.active_model,
             retrieval="hybrid" if ai.vector_configured else "fulltext",
             documents=count or 0,
         )

@@ -2,13 +2,19 @@ import aiohttp
 
 from app.config.ai import ai
 from app.exceptions import ServiceUnavailableError
+from app.services import gigachat
 
 _URL = "https://api.voyageai.com/v1/embeddings"
 _BATCH = 64
 
 
 async def embed(texts: list[str], *, input_type: str) -> list[list[float]]:
-    """Voyage AI embeddings. input_type is 'document' for chunks and 'query' for questions."""
+    """GigaChat embeddings when configured, otherwise Voyage AI.
+
+    input_type ('document' | 'query') only matters for Voyage.
+    """
+    if ai.gigachat_configured:
+        return await gigachat.embed(texts)
     vectors: list[list[float]] = []
     headers = {"Authorization": f"Bearer {ai.embedding_api_key.get_secret_value()}"}
     timeout = aiohttp.ClientTimeout(total=60)

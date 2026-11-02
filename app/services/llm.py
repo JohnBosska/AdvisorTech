@@ -1,20 +1,11 @@
-from dataclasses import dataclass
-from typing import Protocol
-
 from anthropic import APIError, AsyncAnthropic
 
 from app.config.ai import ai
 from app.exceptions import ServiceUnavailableError
+from app.services.gigachat import GigaChatLLM
+from app.services.llm_types import LLM, LLMResult
 
-
-@dataclass(frozen=True)
-class LLMResult:
-    text: str
-    model: str
-
-
-class LLM(Protocol):
-    async def complete(self, system: str, messages: list[dict[str, str]]) -> LLMResult: ...
+__all__ = ["LLM", "LLMResult", "get_llm"]
 
 
 class AnthropicLLM:
@@ -36,6 +27,8 @@ class AnthropicLLM:
 
 def get_llm() -> LLM:
     """Raises 503 when no key is configured. Tests monkeypatch this function."""
-    if not ai.llm_configured:
-        raise ServiceUnavailableError("AI analyst is not configured")
-    return AnthropicLLM()
+    if ai.provider == "gigachat":
+        return GigaChatLLM()
+    if ai.provider == "anthropic":
+        return AnthropicLLM()
+    raise ServiceUnavailableError("AI analyst is not configured")

@@ -23,7 +23,7 @@ from app.resources.knowledge import KnowledgeBase
 from app.schemas.knowledge import DocumentCreateRequest
 from app.services import embeddings
 from app.services import llm as llm_service
-from app.services.llm import LLMResult
+from app.services.llm_types import LLMResult
 
 
 def _db_ready() -> bool:
@@ -146,7 +146,8 @@ def test_chat_answers_with_sources_and_refuses_without_context(monkeypatch) -> N
             owner,
             DocumentCreateRequest(
                 title="Политика скидок",
-                content="Политика скидок: скидок выше 10% требует согласования собственника. " + uuid.uuid4().hex,
+                content="Политика скидок: скидок выше 10% требует согласования собственника. "
+                + uuid.uuid4().hex,
             ),
         )
         answer = await Chat.ask(owner, conversation.id, "Какая политика скидок?")
