@@ -6,7 +6,7 @@ import { LogoMark } from '../../../components/navigation/Wordmark'
 import { BarsCanvas } from './BarsCanvas'
 
 const BrainLaptop = lazy(() => import('../../../components/3d/BrainLaptop'))
-const STRIP = ['1С:Бухгалтерия', '1С:Управление торговлей', '1С:ERP', 'PostgreSQL', 'MS SQL Server', 'Qdrant', 'Temporal']
+const STRIP = ['1С:Бухгалтерия', '1С:Управление торговлей', '1С:ERP', 'PostgreSQL', 'pgvector', 'MS SQL Server', 'Temporal']
 
 export function Hero({ authed }: { authed: boolean }) {
   return (
@@ -20,8 +20,8 @@ export function Hero({ authed }: { authed: boolean }) {
           </div>
           <div className="relative flex min-h-[620px] flex-col justify-end p-6 sm:p-10 lg:min-h-[560px]">
             <p className="mb-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[#9aa09c]"><LogoMark className="h-4 w-4" />{PRODUCT_NAME} · AI-аналитика поверх 1С</p>
-            <h1 className="max-w-[760px] text-[clamp(2.1rem,4.6vw,3.6rem)] font-normal leading-[1.08] tracking-[-0.03em] text-[#dfe3df]">
-              Платформа бизнес-аналитики для МСП,<br className="hidden sm:inline" /> построенная на данных <a href="#how" className="underline decoration-1 underline-offset-[6px] hover:text-white">вашей 1С</a>.
+            <h1 className="lp-display max-w-[760px] text-[clamp(2.4rem,5.4vw,4.4rem)] text-[#eef2ee]">
+              Данные <a href="#how" className="underline decoration-1 underline-offset-[8px] hover:text-white">1С</a> — в решения для вашего бизнеса.
             </h1>
           </div>
         </div>

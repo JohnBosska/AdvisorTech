@@ -29,6 +29,8 @@ dialog::backdrop { background: rgb(0 0 0 / 72%); backdrop-filter: blur(2px); }
 
 /* ---- landing (dark, Neon-style layout) ---- */
 .lp { background: var(--color-paper); color: var(--color-ink); }
+/* Headline face: Inter Tight Medium, the closest free match to the neon.com display type. */
+.lp-display { font-family: "Inter Tight", var(--font-sans); font-weight: 500; line-height: 1.04; letter-spacing: -0.035em; font-feature-settings: normal; }
 .lp-mono { font-family: var(--font-mono); }
 .lp-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
 .lp-label::before { content: ''; width: 0; height: 0; border-left: 7px solid var(--color-accent-deep); border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
