@@ -14,7 +14,7 @@ Tech Adviser: AI-платформа бизнес-аналитики для МС�
 
 ## Build, Test, and Development Commands
 
-Use Python 3.14 and `uv` for dependency management. Run `uv sync --locked` to install the locked environment, then `uv run bash cmd/run_app.sh` to serve locally. Start the Temporal worker with `uv run bash cmd/run_worker.sh`. Browse `/docs` for Swagger UI and `/health` for the health endpoint. Run `docker compose up --build` for the API, PostgreSQL, Temporal development server, and worker; `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --wait postgres` starts only the database (published on loopback; the main compose file publishes no DB port). Add or remove dependencies with `uv add <package>` and `uv remove <package>`, and commit corresponding `pyproject.toml` and `uv.lock` changes together.
+Use Python 3.14 and `uv` for dependency management. Run `uv sync --locked` to install the locked environment, then `uv run bash cmd/run_app.sh` to serve locally. Start the Temporal worker with `uv run bash cmd/run_worker.sh`. Browse `/docs` for Swagger UI and `/health` for the health endpoint. Run `docker compose up --build` for the API, PostgreSQL, Temporal development server, and worker; `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --wait postgres` starts only the database (PostgreSQL is published on 127.0.0.1 only, never publicly). Add or remove dependencies with `uv add <package>` and `uv remove <package>`, and commit corresponding `pyproject.toml` and `uv.lock` changes together.
 
 ## Coding Style & Naming Conventions
 

@@ -3,8 +3,7 @@
 # Networks
 #   edge     nginx-proxy-manager, frontend, api  (everything the proxy may reach)
 #   backend  api, worker, migrate, temporal, postgres  (data plane; nothing here is published)
-# Only nginx-proxy-manager publishes ports (host-side debugging ports: docker-compose.dev.yml).
-# Only nginx-proxy-manager publishes public ports. Domains are configured in it by `npm-setup`.
+# Public ports: only nginx-proxy-manager (80/443). PostgreSQL listens on the host's 127.0.0.1 only. Domains are configured in it by `npm-setup`.
 
 x-api-env: &api-env
   POSTGRES_HOST: postgres
@@ -157,6 +156,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-techadviser}
       POSTGRES_USER: ${POSTGRES_USER:-techadviser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      # Loopback of the host only (never public). Reach it with: ssh -L 5432:127.0.0.1:5432 root@<server>
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
