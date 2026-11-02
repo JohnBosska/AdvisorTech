@@ -17,11 +17,13 @@ import urllib.request
 
 BASE = os.environ.get("NPM_URL", "http://nginx-proxy-manager:81").rstrip("/")
 DEFAULT_EMAIL, DEFAULT_PASSWORD = "admin@example.com", "changeme"
-EMAIL = os.environ.get("NPM_ADMIN_EMAIL", "")
+ADMIN_EMAIL = os.environ.get("NPM_ADMIN_EMAIL", "")
 PASSWORD = os.environ.get("NPM_ADMIN_PASSWORD", "")
 APP_DOMAIN = os.environ.get("APP_DOMAIN", "").strip()
 API_DOMAIN = os.environ.get("API_DOMAIN", "").strip()
 LE_EMAIL = os.environ.get("NPM_LETSENCRYPT_EMAIL", "").strip()
+# NPM >= 2.13 uses the admin user's email as the Let's Encrypt contact, so the admin gets it.
+EMAIL = LE_EMAIL or ADMIN_EMAIL
 
 
 class NpmError(Exception):
@@ -70,12 +72,28 @@ def login(email, password):
     return call("POST", "/tokens", {"identity": email, "secret": password})["token"]
 
 
+def set_admin_email(token):
+    me = call("GET", "/users/me", token=token)
+    if me["email"] != EMAIL:
+        call(
+            "PUT",
+            f"/users/{me['id']}",
+            {"name": me.get("name") or "Administrator", "nickname": me.get("nickname") or "admin",
+             "email": EMAIL, "roles": me.get("roles") or ["admin"], "is_disabled": False},
+            token,
+        )
+        print("nginx-proxy-manager: admin email set to the Let's Encrypt contact")
+
+
 def authenticate():
-    """Log in with the configured admin; on a fresh install replace the default admin."""
-    try:
+    """Log in as the admin; migrate an older admin email or the factory default if needed."""
+    for identity, secret in ((EMAIL, PASSWORD), (ADMIN_EMAIL, PASSWORD)):
+        try:
+            token = login(identity, secret)
+        except NpmError:
+            continue
+        set_admin_email(token)
         return login(EMAIL, PASSWORD)
-    except NpmError:
-        pass
     try:
         token = login(DEFAULT_EMAIL, DEFAULT_PASSWORD)
     except NpmError:
@@ -83,21 +101,15 @@ def authenticate():
             "Cannot log in to nginx-proxy-manager with NPM_ADMIN_EMAIL/NPM_ADMIN_PASSWORD "
             "or with the factory default admin. Fix the credentials in .env."
         ) from None
+    set_admin_email(token)
     me = call("GET", "/users/me", token=token)
-    call(
-        "PUT",
-        f"/users/{me['id']}",
-        {"name": me.get("name") or "Administrator", "nickname": "admin", "email": EMAIL,
-         "roles": ["admin"], "is_disabled": False},
-        token,
-    )
     call(
         "PUT",
         f"/users/{me['id']}/auth",
         {"type": "password", "current": DEFAULT_PASSWORD, "secret": PASSWORD},
         token,
     )
-    print("nginx-proxy-manager: default admin replaced with NPM_ADMIN_EMAIL")
+    print("nginx-proxy-manager: default admin replaced")
     return login(EMAIL, PASSWORD)
 
 
@@ -111,8 +123,7 @@ def ensure_certificate(token, domain):
     cert = call(
         "POST",
         "/nginx/certificates",
-        {"provider": "letsencrypt", "domain_names": [domain],
-         "meta": {"letsencrypt_email": LE_EMAIL, "letsencrypt_agree": True, "dns_challenge": False}},
+        {"provider": "letsencrypt", "domain_names": [domain], "meta": {"dns_challenge": False}},
         token,
     )
     return cert["id"]
@@ -144,7 +155,7 @@ def ensure_proxy_host(token, domain, forward_host, forward_port):
         "caching_enabled": False,
         "allow_websocket_upgrade": True,
         "advanced_config": "",
-        "meta": {"letsencrypt_agree": bool(certificate_id), "dns_challenge": False},
+        "meta": {"dns_challenge": False},
         "locations": [],
     }
     if existing:
