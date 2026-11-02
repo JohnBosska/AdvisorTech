@@ -4,7 +4,7 @@ import { Wordmark } from '../../components/navigation/Wordmark'
 import { PRODUCT_NAME } from '../../config/brand'
 import { useAuth } from '../../lib/auth/AuthProvider'
 import { Architecture } from './parts/Architecture'
-import { Pricing, FinalCta, Stack } from './parts/Bottom'
+import { Pricing, FinalCta } from './parts/Bottom'
 import { FeatureStrip } from './parts/FeatureStrip'
 import { Hero } from './parts/Hero'
 import { QualityChart } from './parts/QualityChart'
@@ -50,7 +50,6 @@ export function LandingPage() {
         <ScaleSection />
         <Architecture />
         <QualityChart />
-        <Stack />
         <Pricing authed={isAuthenticated} />
         <FinalCta authed={isAuthenticated} />
       </main>

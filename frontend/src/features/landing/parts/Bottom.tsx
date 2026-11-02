@@ -1,23 +1,6 @@
 import { Link } from 'react-router-dom'
 import { DotIcon, Label } from './Blocks'
 
-const STACK = [
-  { k: 'PostgreSQL 18', t: 'Аналитическая БД каждого клиента и данные платформы.' },
-  { k: 'Temporal', t: 'Надёжная оркестрация синхронизации, сверки и отчётов.' },
-  { k: 'Qdrant', t: 'Семантический поиск для RAG. Не источник чисел.' },
-]
-
-export function Stack() {
-  return (
-    <section className="mx-auto max-w-[1180px] border-t border-white/10 px-4 py-20 sm:px-6">
-      <p className="max-w-[760px] text-[clamp(1.3rem,2.2vw,1.75rem)] leading-[1.25] tracking-[-0.02em]"><span className="text-ink-soft">Проверенный стек. </span>Модульный монолит на Python и FastAPI, данные в PostgreSQL, тяжёлые процессы — в Temporal.</p>
-      <div className="mt-14 grid gap-10 md:grid-cols-3">
-        {STACK.map((s) => <div key={s.k} className="border-l border-white/20 pl-5"><p className="max-w-[220px] text-sm text-ink/60">{s.t}</p><p className="mt-24 text-[clamp(1.8rem,3.4vw,2.75rem)] font-light tracking-tight text-ink/50">{s.k}</p></div>)}
-      </div>
-    </section>
-  )
-}
-
 const PLAN = [
   { icon: 'burst', t: 'Интеграция с 1С', d: 'Поддерживаемые конфигурации, только чтение, агент у вас.' },
   { icon: 'ring', t: 'Облачная PostgreSQL', d: 'Отдельная аналитическая среда, миграции и бэкапы на стороне платформы.' },
