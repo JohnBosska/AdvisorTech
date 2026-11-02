@@ -1,0 +1,14 @@
+# Local development only. Publishes debugging ports on loopback:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --wait postgres
+# Do NOT use on the server: there, reach the database with `docker compose exec postgres psql ...`.
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+  api:
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+  temporal:
+    ports:
+      - "127.0.0.1:7233:7233"
+      - "127.0.0.1:8233:8233"

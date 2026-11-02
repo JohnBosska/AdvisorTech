@@ -3,6 +3,7 @@
 # Networks
 #   edge     nginx-proxy-manager, frontend, api  (everything the proxy may reach)
 #   backend  api, worker, migrate, temporal, postgres  (data plane; nothing here is published)
+# Only nginx-proxy-manager publishes ports (host-side debugging ports: docker-compose.dev.yml).
 # Only nginx-proxy-manager publishes public ports. Domains are configured in it by `npm-setup`.
 
 x-api-env: &api-env
@@ -88,8 +89,6 @@ services:
     container_name: techadviser-api
     restart: unless-stopped
     environment: *api-env
-    ports:
-      - "127.0.0.1:${API_PORT:-8000}:8000"  # local debugging only; the public path is via NPM
     depends_on:
       postgres:
         condition: service_healthy
@@ -121,8 +120,6 @@ services:
     image: temporalio/temporal:latest
     container_name: techadviser-temporal
     command: ["server", "start-dev", "--ip", "0.0.0.0"]
-    ports:
-      - "127.0.0.1:8233:8233"  # Temporal Web UI, loopback only
     restart: unless-stopped
     networks:
       - backend
@@ -156,8 +153,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-techadviser}
       POSTGRES_USER: ${POSTGRES_USER:-techadviser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-    ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
