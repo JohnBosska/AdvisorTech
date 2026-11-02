@@ -153,7 +153,7 @@ services:
       - backend
 
   postgres:
-    image: pgvector/pgvector:pg18
+    image: pgvector/pgvector:pg18-trixie
     container_name: techadviser-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-techadviser}
