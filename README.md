@@ -1,4 +1,26 @@
-# Salon Booking API
+# Tech Adviser
+
+AI-платформа бизнес-аналитики для малого и среднего бизнеса на данных 1С: интеграция с 1С, облачная
+аналитическая PostgreSQL, сквозная аналитика, отчётность для собственника, ориентированная на РСБУ,
+AI-аналитик и Excel-отчёты. Это слой аналитики поверх 1С, а не её замена.
+Бизнес-требования: [`docs/PROJECT_BUSINESS_ANALYSIS_BRIEF_RU.md`](docs/PROJECT_BUSINESS_ANALYSIS_BRIEF_RU.md).
+Архитектура и статус реализации: [`ARCHITECTURE.md`](ARCHITECTURE.md), [`docs/FRONTEND_STATUS.md`](docs/FRONTEND_STATUS.md).
+
+## Frontend
+
+Веб-приложение разрабатывается на React, TypeScript и Vite (каталог [`frontend/`](frontend)).
+
+- [Архитектура frontend](./FRONTEND_ARCHITECTURE.md)
+- [Дизайн-система](./FRONTEND_DESIGN_SYSTEM.md)
+- [Мультиагентный процесс](./FRONTEND_AGENTS.md)
+
+Публичный сайт и кабинет собственника выполнены в тёмном технологичном стиле с мятно-зелёными акцентами.
+В hero лендинга — интерактивный ноутбук с мозгом из символов (React Three Fiber). Данные, которых ещё нет
+в backend, показываются как «Демо-данные».
+
+```bash
+cd frontend && npm ci && npm run dev   # http://localhost:5173, /api проксируется на :8000
+```
 
 ## Локальный запуск
 

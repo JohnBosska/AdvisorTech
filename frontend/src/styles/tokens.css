@@ -1,0 +1,36 @@
+@theme {
+  --color-bg: #000000;
+  --color-surface-1: #0b0d0c;
+  --color-surface-2: #121413;
+  --color-surface-3: #18191b;
+  --color-border: #26292d;
+  --color-border-strong: #3a3e44;
+  --color-text-soft: #e4f1eb;
+  --color-muted: #94979e;
+  --color-accent: #34d59a;
+  --color-accent-strong: #5be3b2;
+  --color-mint: #a5f3d2;
+  --color-cyan: #62ddeb;
+  --color-blue: #557eea;
+  --color-violet: #8a74d6;
+  --color-link: #39a57d;
+  --color-warning: #e6b85c;
+  --color-danger: #f17c78;
+  --color-paper: #f8f8f5;
+  --color-ink: #0b0d0c;
+  --color-ink-soft: #8a8d91;
+  --color-line: #d6d8d2;
+  --color-accent-deep: #17895c;
+  --color-mint-wash: #e3eee8;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+}
+
+:root {
+  color-scheme: dark;
+  --gradient-hero: linear-gradient(125deg, #34d59a 0%, #62ddeb 34%, #557eea 66%, #8a74d6 100%);
+  --gradient-glow: radial-gradient(circle at 50% 50%, rgb(52 213 154 / 20%), rgb(98 221 235 / 9%) 38%, transparent 72%);
+}

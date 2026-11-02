@@ -1,8 +1,16 @@
 # Repository Guidelines
 
+## Product
+
+Tech Adviser: AI-платформа бизнес-аналитики для МСП на данных 1С. Источник требований — `docs/PROJECT_BUSINESS_ANALYSIS_BRIEF_RU.md`; архитектура и статус — `ARCHITECTURE.md`, `docs/FRONTEND_STATUS.md`. Не называть продукт иначе и не выдавать демо/планируемые интеграции за работающие.
+
+## Frontend
+
+`frontend/` — React 19 + TypeScript + Vite + Tailwind 4 (npm, один `package-lock.json`). Правила: `FRONTEND_ARCHITECTURE.md`, `FRONTEND_DESIGN_SYSTEM.md`, `FRONTEND_AGENTS.md`. Команды из `frontend/`: `npm ci`, `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Название бренда — только в `frontend/src/config/brand.ts`; демо-данные — только в `frontend/src/mocks/` с меткой «Демо-данные».
+
 ## Project Structure & Module Organization
 
-`app/` contains the FastAPI service package, and root `app.py` defines and starts the application; `temporal_entry.py` starts the worker; `cmd/` contains process launchers for the API and Temporal worker. `app/routers/` defines public and admin endpoints; `app/schemas/` holds API schemas; and `app/config/`, `app/data_layer/`, `app/middleware/`, `app/resources/`, `app/services/`, and `app/utils/` contain supporting code. SQLAlchemy connection/session setup lives in `app/data_layer/alchemy/api_db.py`, shared ORM models in `app/data_layer/alchemy/models/`, and Alembic migrations in `app/data_layer/alchemy/migrations/`. Temporal workflow definitions belong in `app/temporal/workflows/`; activities and workers belong in `app/temporal/`. PostgreSQL and a Temporal development server are available in Compose; API persistence is being moved from in-memory storage. There is no checked-in test or asset directory yet.
+`app/` contains the FastAPI service package, and root `app.py` defines and starts the application; `temporal_entry.py` starts the worker; `cmd/` contains process launchers for the API and Temporal worker. `app/routers/` defines public and admin endpoints; `app/schemas/` holds API schemas; and `app/config/`, `app/data_layer/`, `app/middleware/`, `app/resources/`, `app/services/`, and `app/utils/` contain supporting code. SQLAlchemy connection/session setup lives in `app/data_layer/alchemy/api_db.py`, shared ORM models in `app/data_layer/alchemy/models/`, and Alembic migrations in `app/data_layer/alchemy/migrations/`. Temporal workflow definitions belong in `app/temporal/workflows/`; activities and workers belong in `app/temporal/`. PostgreSQL and a Temporal development server are available in Compose; API persistence is being moved from in-memory storage. Backend tests live in `tests/`; frontend tests sit next to the code (`*.test.ts(x)`).
 
 ## Build, Test, and Development Commands
 
@@ -14,7 +22,7 @@ Follow standard Python style: four-space indentation, `snake_case` for modules, 
 
 ## Testing Guidelines
 
-No test suite or test runner configuration is present yet. For new behavior, add focused `pytest` tests under `tests/`, using `test_*.py` filenames and descriptive `test_<behavior>` functions. Exercise API routes through FastAPI's test client and cover success and error responses. Run tests with `uv run pytest` after adding the test dependency and suite.
+Run `uv sync --locked --all-groups` first so `pytest` is installed. For new behavior, add focused `pytest` tests under `tests/`, using `test_*.py` filenames and descriptive `test_<behavior>` functions. Exercise API routes through FastAPI's test client and cover success and error responses. Run tests with `uv run pytest` after adding the test dependency and suite.
 
 ## Commit & Pull Request Guidelines
 
