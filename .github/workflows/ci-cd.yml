@@ -140,8 +140,11 @@ jobs:
           SSH="ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes $TARGET"
           # Short-lived job token goes over stdin, never onto a command line.
           printf '%s' "$GHCR_TOKEN" | $SSH "docker login ghcr.io -u '$GHCR_USER' --password-stdin"
-          $SSH "cd /opt/advisortech && export IMAGE_TAG='$IMAGE_TAG' \
-            && docker compose pull api frontend \
-            && docker compose up -d --remove-orphans --no-build --wait \
+          # IMAGE_TAG lives in the server .env so manual `docker compose` commands match the release.
+          $SSH "cd /opt/advisortech \\
+            && (grep -v '^IMAGE_TAG=' .env > .env.new; echo 'IMAGE_TAG=$IMAGE_TAG' >> .env.new; chmod 600 .env.new; mv .env.new .env) \\
+            && docker compose pull api frontend \\
+            && docker compose up -d --remove-orphans --no-build --wait \\
+            && docker compose run --rm npm-setup \\
             && docker compose ps"
           $SSH "docker logout ghcr.io; docker image prune -f >/dev/null"
