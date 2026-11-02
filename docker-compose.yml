@@ -1,47 +1,140 @@
+# Whole platform in one file: API, worker, Temporal, PostgreSQL, frontend and nginx-proxy-manager.
+#
+# Networks
+#   edge     nginx-proxy-manager, frontend, api  (everything the proxy may reach)
+#   backend  api, worker, migrate, temporal, postgres  (data plane; nothing here is published)
+# Only nginx-proxy-manager publishes public ports. Domains are configured in it by `npm-setup`.
+
+x-api-env: &api-env
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_DB: ${POSTGRES_DB:-techadviser}
+  POSTGRES_USER: ${POSTGRES_USER:-techadviser}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+  TEMPORAL_ADDRESS: temporal:7233
+  TEMPORAL_NAMESPACE: default
+  TEMPORAL_TASK_QUEUE: techadviser-default
+  AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?Set AUTH_JWT_SECRET (>= 32 random bytes) in .env}
+  AUTH_ACCESS_TOKEN_TTL_SECONDS: ${AUTH_ACCESS_TOKEN_TTL_SECONDS:-1800}
+  AUTH_REFRESH_TOKEN_TTL_SECONDS: ${AUTH_REFRESH_TOKEN_TTL_SECONDS:-2592000}
+  AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+  AUTH_INVITATION_TTL_SECONDS: ${AUTH_INVITATION_TTL_SECONDS:-604800}
+  AUTH_EMAIL_VERIFICATION_TTL_SECONDS: ${AUTH_EMAIL_VERIFICATION_TTL_SECONDS:-600}
+  AUTH_EMAIL_VERIFICATION_MAX_ATTEMPTS: ${AUTH_EMAIL_VERIFICATION_MAX_ATTEMPTS:-5}
+  AUTH_EMAIL_VERIFICATION_RESEND_SECONDS: ${AUTH_EMAIL_VERIFICATION_RESEND_SECONDS:-60}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+  TELEGRAM_CLIENT_ID: ${TELEGRAM_CLIENT_ID:-}
+  TELEGRAM_AUTH_DATA_MAX_AGE_SECONDS: ${TELEGRAM_AUTH_DATA_MAX_AGE_SECONDS:-300}
+
 services:
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: techadviser-npm
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      # Admin UI: loopback only by default. Use an SSH tunnel, or set NPM_ADMIN_BIND=0.0.0.0.
+      - "${NPM_ADMIN_BIND:-127.0.0.1}:81:81"
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    networks:
+      - edge
+    healthcheck:
+      test: ["CMD", "/bin/check-health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  npm-setup:
+    # One-shot: creates/updates proxy hosts for APP_DOMAIN and API_DOMAIN. Idempotent.
+    image: python:3.14-slim
+    container_name: techadviser-npm-setup
+    restart: "no"
+    command: ["python", "/deploy/npm_setup.py"]
+    environment:
+      NPM_URL: http://nginx-proxy-manager:81
+      NPM_ADMIN_EMAIL: ${NPM_ADMIN_EMAIL:-}
+      NPM_ADMIN_PASSWORD: ${NPM_ADMIN_PASSWORD:-}
+      NPM_LETSENCRYPT_EMAIL: ${NPM_LETSENCRYPT_EMAIL:-}
+      APP_DOMAIN: ${APP_DOMAIN:-}
+      API_DOMAIN: ${API_DOMAIN:-}
+    volumes:
+      - ./deploy/npm_setup.py:/deploy/npm_setup.py:ro
+    depends_on:
+      nginx-proxy-manager:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - edge
+
+  frontend:
+    build: ./frontend
+    container_name: techadviser-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - edge
+
   api:
     build: .
-    container_name: salon-booking-api
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB:-salon_booking}
-      POSTGRES_USER: ${POSTGRES_USER:-salon_booking}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-      TEMPORAL_ADDRESS: temporal:7233
-      TEMPORAL_NAMESPACE: default
-      TEMPORAL_TASK_QUEUE: salon-booking-email
-      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-}
-      AUTH_ACCESS_TOKEN_TTL_SECONDS: ${AUTH_ACCESS_TOKEN_TTL_SECONDS:-1800}
-      AUTH_EMAIL_VERIFICATION_TTL_SECONDS: ${AUTH_EMAIL_VERIFICATION_TTL_SECONDS:-600}
-      AUTH_EMAIL_VERIFICATION_MAX_ATTEMPTS: ${AUTH_EMAIL_VERIFICATION_MAX_ATTEMPTS:-5}
-      AUTH_EMAIL_VERIFICATION_RESEND_SECONDS: ${AUTH_EMAIL_VERIFICATION_RESEND_SECONDS:-60}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_CLIENT_ID: ${TELEGRAM_CLIENT_ID:-}
-      TELEGRAM_AUTH_DATA_MAX_AGE_SECONDS: ${TELEGRAM_AUTH_DATA_MAX_AGE_SECONDS:-300}
+    container_name: techadviser-api
+    restart: unless-stopped
+    environment: *api-env
     ports:
-      - "8000:8000"
+      - "127.0.0.1:${API_PORT:-8000}:8000"  # local debugging only; the public path is via NPM
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - edge
+      - backend
+
+  migrate:
+    build: .
+    container_name: techadviser-migrate
+    restart: "no"
+    command: ["alembic", "upgrade", "head"]
+    environment: *api-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
 
   temporal:
     image: temporalio/temporal:latest
-    container_name: salon-booking-temporal
+    container_name: techadviser-temporal
     command: ["server", "start-dev", "--ip", "0.0.0.0"]
     ports:
-      - "7233:7233"
-      - "8233:8233"
+      - "127.0.0.1:8233:8233"  # Temporal Web UI, loopback only
     restart: unless-stopped
+    networks:
+      - backend
 
   temporal-worker:
     build: .
-    container_name: salon-booking-temporal-worker
+    container_name: techadviser-temporal-worker
     command: ["bash", "cmd/run_worker.sh"]
     environment:
       TEMPORAL_ADDRESS: temporal:7233
       TEMPORAL_NAMESPACE: default
-      TEMPORAL_TASK_QUEUE: salon-booking-email
+      TEMPORAL_TASK_QUEUE: techadviser-default
       EMAIL_HOST: ${EMAIL_HOST:-}
       EMAIL_PORT: ${EMAIL_PORT:-587}
       EMAIL_USERNAME: ${EMAIL_USERNAME:-}
@@ -53,12 +146,15 @@ services:
       temporal:
         condition: service_started
     restart: unless-stopped
+    networks:
+      - backend
 
   postgres:
     image: postgres:18
+    container_name: techadviser-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-salon_booking}
-      POSTGRES_USER: ${POSTGRES_USER:-salon_booking}
+      POSTGRES_DB: ${POSTGRES_DB:-techadviser}
+      POSTGRES_USER: ${POSTGRES_USER:-techadviser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
@@ -70,6 +166,15 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  edge:
+  backend:
 
 volumes:
   postgres_data:
+  npm_data:
+  npm_letsencrypt:
