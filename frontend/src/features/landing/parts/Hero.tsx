@@ -27,9 +27,9 @@ export function Hero({ authed }: { authed: boolean }) {
         </div>
         <div className="flex flex-wrap items-center gap-6 py-6">
           <Link to={authed ? '/app' : '/register'} className="group inline-flex items-center gap-2 text-sm font-medium">{authed ? 'Открыть кабинет' : 'Начать'}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden /></Link>
-          <a href="#how" className="rounded-full border border-ink/50 px-6 py-2.5 text-sm text-ink/70 transition-colors hover:border-ink hover:text-ink">Как это работает</a>
+          <a href="#how" className="rounded-full border border-white/20 px-6 py-2.5 text-sm text-ink/70 transition-colors hover:border-ink hover:text-ink">Как это работает</a>
         </div>
-        <div className="border-t border-ink/60" />
+        <div className="border-t border-white/20" />
         <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 py-9 text-[15px] font-medium text-ink/55" aria-label="Совместимость">
           {STRIP.map((s) => <li key={s} className="font-mono text-[13px] tracking-tight">{s}</li>)}
         </ul>

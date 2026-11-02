@@ -16,7 +16,7 @@ export function QualityChart() {
   return (
     <section className="mx-auto max-w-[1180px] px-4 pb-24 sm:px-6">
       <p className="max-w-[760px] text-[clamp(1.4rem,2.4vw,2rem)] leading-[1.2] tracking-[-0.02em]"><span className="text-ink-soft">Контроль качества данных работает рядом с аналитикой. </span>Подозрительный показатель не попадает в рекомендации молча.</p>
-      <div role="tablist" aria-label="Режим" className="mt-8 inline-flex border border-ink/70 text-[13px]">
+      <div role="tablist" aria-label="Режим" className="mt-8 inline-flex border border-white/20 text-[13px]">
         {([['without', 'Без контроля'], ['with', 'С контролем качества']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={mode === k} onClick={() => setMode(k)} className={`px-4 py-2 transition-colors ${mode === k ? 'bg-ink text-white' : 'text-ink/50 hover:text-ink'}`}>{l}</button>)}
       </div>
       <div ref={ref} className="relative mt-10 bg-[#101211] p-0">

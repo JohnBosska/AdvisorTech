@@ -93,7 +93,7 @@ export function FeatureStrip() {
       <Label>Соберите аналитику</Label>
       <p className="lp-num mt-6" aria-hidden>01</p>
       <TwoTone lead="Не просто отчёты." className="mt-10 max-w-[900px]">{'Tech Adviser — слой аналитики поверх 1С: интеграция, облачная база, AI-аналитик и Excel-отчёты.'}</TwoTone>
-      <div ref={ref} className="mt-16 grid gap-px bg-ink/10 md:grid-cols-2 lg:grid-cols-4">
+      <div ref={ref} className="mt-16 grid gap-px bg-white/10 md:grid-cols-2 lg:grid-cols-4">
         {ITEMS.map(({ lead, text, C }) => (
           <div key={lead} className="flex flex-col bg-paper pr-0 lg:pr-4">
             <p className="min-h-[96px] pb-4 text-[15px] leading-snug"><span className="text-ink-soft">{lead} </span>{text}</p>

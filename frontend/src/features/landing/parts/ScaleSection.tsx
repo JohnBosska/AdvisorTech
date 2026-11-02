@@ -26,7 +26,7 @@ function WindowFan() {
 }
 
 const Stat = ({ k, text, meta }: { k: string; text: string; meta: string }) => (
-  <div className="border border-ink/80 p-8">
+  <div className="border border-white/20 p-8">
     <p className="font-mono text-xs text-ink-soft">{meta}</p>
     <p className="mt-10 text-[clamp(2.5rem,5vw,4rem)] font-light leading-none tracking-tight text-ink/60">{k}</p>
     <p className="mt-6 max-w-[260px] text-[15px] leading-snug text-ink/60">{text}</p>

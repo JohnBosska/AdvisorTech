@@ -9,10 +9,10 @@ const STACK = [
 
 export function Stack() {
   return (
-    <section className="mx-auto max-w-[1180px] border-t border-ink/30 px-4 py-20 sm:px-6">
+    <section className="mx-auto max-w-[1180px] border-t border-white/10 px-4 py-20 sm:px-6">
       <p className="max-w-[760px] text-[clamp(1.3rem,2.2vw,1.75rem)] leading-[1.25] tracking-[-0.02em]"><span className="text-ink-soft">Проверенный стек. </span>Модульный монолит на Python и FastAPI, данные в PostgreSQL, тяжёлые процессы — в Temporal.</p>
       <div className="mt-14 grid gap-10 md:grid-cols-3">
-        {STACK.map((s) => <div key={s.k} className="border-l border-ink/70 pl-5"><p className="max-w-[220px] text-sm text-ink/60">{s.t}</p><p className="mt-24 text-[clamp(1.8rem,3.4vw,2.75rem)] font-light tracking-tight text-ink/50">{s.k}</p></div>)}
+        {STACK.map((s) => <div key={s.k} className="border-l border-white/20 pl-5"><p className="max-w-[220px] text-sm text-ink/60">{s.t}</p><p className="mt-24 text-[clamp(1.8rem,3.4vw,2.75rem)] font-light tracking-tight text-ink/50">{s.k}</p></div>)}
       </div>
     </section>
   )
@@ -46,7 +46,7 @@ export function FinalCta({ authed }: { authed: boolean }) {
       <p className="mt-24 max-w-[420px] text-[15px] leading-snug text-ink-soft">Подключите 1С и увидьте картину бизнеса в одном месте.<br />Начните с регистрации.</p>
       <div className="mt-8 flex flex-col items-center gap-5">
         <Link to={authed ? '/app' : '/register'} className="text-sm font-medium">{authed ? 'Открыть кабинет' : 'Начать'}</Link>
-        <a href="#how" className="w-full rounded-full border border-ink/60 py-3 text-center text-sm text-ink/60 hover:border-ink hover:text-ink">Как это работает</a>
+        <a href="#how" className="w-full rounded-full border border-white/20 py-3 text-center text-sm text-ink/60 hover:border-ink hover:text-ink">Как это работает</a>
         <code className="font-mono text-[13px] text-ink/70">$ techadviser connect --read-only</code>
       </div>
       <p className="mt-3 text-center text-[11px] text-ink-soft">Команда показана как иллюстрация: CLI пока не существует.</p>

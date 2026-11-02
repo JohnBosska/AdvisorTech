@@ -16,12 +16,12 @@
   --color-link: #39a57d;
   --color-warning: #e6b85c;
   --color-danger: #f17c78;
-  --color-paper: #f8f8f5;
-  --color-ink: #0b0d0c;
-  --color-ink-soft: #8a8d91;
-  --color-line: #d6d8d2;
-  --color-accent-deep: #17895c;
-  --color-mint-wash: #e3eee8;
+  --color-paper: #000000;
+  --color-ink: #e4f1eb;
+  --color-ink-soft: #8d9199;
+  --color-line: #26292d;
+  --color-accent-deep: #34d59a;
+  --color-mint-wash: #0c1612;
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, monospace;
   --radius-sm: 4px;

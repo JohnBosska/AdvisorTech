@@ -27,7 +27,7 @@ dialog::backdrop { background: rgb(0 0 0 / 72%); backdrop-filter: blur(2px); }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
-/* ---- landing (light, Neon-style layout) ---- */
+/* ---- landing (dark, Neon-style layout) ---- */
 .lp { background: var(--color-paper); color: var(--color-ink); }
 .lp-mono { font-family: var(--font-mono); }
 .lp-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
@@ -36,8 +36,8 @@ dialog::backdrop { background: rgb(0 0 0 / 72%); backdrop-filter: blur(2px); }
 .lp-twotone .lead { color: var(--color-ink-soft); transition: color 1s ease; }
 .lp-twotone .rest { color: var(--color-ink-soft); transition: color 1s ease .25s; }
 .lp-twotone.on .rest { color: var(--color-ink); }
-.lp-twotone.on .lead { color: #a9ada9; }
-.lp-bars-bg { background-image: repeating-linear-gradient(to right, rgb(11 13 12 / 7%) 0 1px, transparent 1px 8px); }
+.lp-twotone.on .lead { color: #6f747b; }
+.lp-bars-bg { background-image: repeating-linear-gradient(to right, rgb(255 255 255 / 6%) 0 1px, transparent 1px 8px); }
 .dash-flow { stroke-dasharray: 5 6; animation: dash 1.2s linear infinite; }
 @keyframes dash { to { stroke-dashoffset: -22; } }
 @keyframes blink { 50% { opacity: 0; } }

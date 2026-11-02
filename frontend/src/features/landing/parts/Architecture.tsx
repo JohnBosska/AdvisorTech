@@ -38,29 +38,29 @@ function Callout({ c }: { c: (typeof CALLOUTS)[number] }) {
   )
 }
 
-const box = 'absolute flex items-center justify-center border border-ink/40 bg-white/70 text-center text-[11px] text-ink/80'
+const box = 'absolute flex items-center justify-center border border-white/10 bg-surface-2/80 text-center text-[11px] text-ink/80'
 
 export function Architecture() {
   return (
     <section className="mx-auto max-w-[1180px] px-4 py-24 sm:px-6">
       <TwoTone lead="Способ построения аналитики меняется, но основа остаётся прежней:" className="max-w-[900px]">{'надёжные данные, прослеживаемые расчёты и понятные решения.'}</TwoTone>
-      <div className="mt-6 border-t border-ink/30" />
+      <div className="mt-6 border-t border-white/10" />
 
       <div className="relative mb-40 mt-8 hidden aspect-[1000/640] lg:block">
         <div className="absolute inset-x-0 top-[27%] bottom-[12%] bg-mint-wash lp-bars-bg" aria-hidden />
-        <div className="absolute left-[28%] right-[10%] top-[31%] bottom-[16%] border border-ink/25 bg-white/40" aria-hidden />
+        <div className="absolute left-[28%] right-[10%] top-[31%] bottom-[16%] border border-white/10 bg-surface-1/60" aria-hidden />
         <p className="absolute left-[29%] top-[28.5%] text-xs">Tech Adviser</p>
         {/* diagram nodes */}
-        <div className={`${box} left-[8%] top-[48%] h-[8%] w-[16%] bg-white`}>Ваша 1С</div>
+        <div className={`${box} left-[8%] top-[48%] h-[8%] w-[16%] bg-surface-2`}>Ваша 1С</div>
         <div className={`${box} left-[30%] top-[38%] h-[22%] w-[15%] border-dashed`}><span>Connector Agent<br /><b className="font-normal text-ink/50">у вас</b></span></div>
         <div className={`${box} left-[30%] top-[63%] h-[14%] w-[15%] border-dashed`}><span>Integration Gateway</span></div>
         <div className={`${box} left-[49%] top-[36%] h-[40%] w-[20%] flex-col justify-start gap-0 p-0`}>
-          <span className="w-full border-b border-ink/30 bg-mint-wash py-1">Облачная PostgreSQL</span>
-          {['Raw', 'Staging', 'Core', 'Marts'].map((l) => <span key={l} className="flex w-full flex-1 items-center justify-center border-b border-ink/20 bg-[#cfe3d8]/70 last:border-0">{l}</span>)}
+          <span className="w-full border-b border-white/10 bg-mint-wash py-1">Облачная PostgreSQL</span>
+          {['Raw', 'Staging', 'Core', 'Marts'].map((l) => <span key={l} className="flex w-full flex-1 items-center justify-center border-b border-white/10 bg-surface-3/70 last:border-0">{l}</span>)}
         </div>
-        <div className={`${box} left-[73%] top-[36%] h-[11%] w-[15%] bg-white`}>Аналитика / KPI</div>
-        <div className={`${box} left-[73%] top-[51%] h-[11%] w-[15%] bg-white`}>AI-аналитик · Qdrant</div>
-        <div className={`${box} left-[73%] top-[66%] h-[11%] w-[15%] bg-white`}>Excel-отчёты</div>
+        <div className={`${box} left-[73%] top-[36%] h-[11%] w-[15%] bg-surface-2`}>Аналитика / KPI</div>
+        <div className={`${box} left-[73%] top-[51%] h-[11%] w-[15%] bg-surface-2`}>AI-аналитик · Qdrant</div>
+        <div className={`${box} left-[73%] top-[66%] h-[11%] w-[15%] bg-surface-2`}>Excel-отчёты</div>
         <svg viewBox="0 0 1000 640" className="pointer-events-none absolute inset-0 h-full w-full" fill="none" aria-hidden>
           {[
             'M240 310 H300', 'M450 270 H490', 'M375 420 V400', 'M450 460 H490', 'M690 290 H730', 'M690 350 H730', 'M690 450 H730',

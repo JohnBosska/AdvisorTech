@@ -29,12 +29,12 @@ export function VerifyFlow() {
       <div ref={ref} className="mt-14 grid gap-10 lg:grid-cols-[1fr_1fr]">
         <ul className="space-y-8 lg:max-w-md">{POINTS.map((p) => <li key={p.t}><p className="text-sm text-ink-soft">{p.t}</p><p className="mt-1.5 text-[15px] leading-snug">{p.d}</p></li>)}</ul>
         <div className="relative min-h-[520px] overflow-hidden" aria-hidden>
-          <div className="absolute inset-y-0 left-[6%] right-[6%] grid grid-cols-8">{Array.from({ length: 8 }, (_, i) => <i key={i} className="border-l border-ink/25" />)}</div>
-          <div className="relative mx-auto mt-0 w-[78%] border border-ink/70 bg-paper">
-            <div className="border-b border-ink/30 px-3 py-2 text-[13px] text-ink/70">Вопрос собственника</div>
+          <div className="absolute inset-y-0 left-[6%] right-[6%] grid grid-cols-8">{Array.from({ length: 8 }, (_, i) => <i key={i} className="border-l border-white/10" />)}</div>
+          <div className="relative mx-auto mt-0 w-[78%] border border-white/20 bg-paper">
+            <div className="border-b border-white/10 px-3 py-2 text-[13px] text-ink/70">Вопрос собственника</div>
             <p className="px-3 py-3 text-[13px] text-ink-soft">В какой группе самая низкая валовая маржа?</p>
             <p className="px-3 text-xs text-ink/60">{n >= 1 ? 'Обработано за 2 с ›' : 'Считаю…'}</p>
-            <div className="m-3 mt-2 border border-ink/50 p-2.5 text-[13px] text-ink/60">Задать уточняющий вопрос…</div>
+            <div className="m-3 mt-2 border border-white/20 p-2.5 text-[13px] text-ink/60">Задать уточняющий вопрос…</div>
           </div>
           <svg viewBox="0 0 300 330" className="absolute inset-x-0 bottom-0 mx-auto h-[330px] w-[78%]" fill="none">
             <path d="M150 0 V120 M150 120 C150 160 160 170 190 172" stroke="#17895c" strokeOpacity=".6" strokeWidth="1.5" style={{ ['--len' as string]: 400, strokeDasharray: 400, animation: on ? 'draw 1.6s ease-out forwards' : undefined }} />

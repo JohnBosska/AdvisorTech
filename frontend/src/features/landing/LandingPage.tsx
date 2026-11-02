@@ -23,22 +23,22 @@ export function LandingPage() {
 
   return (
     <div className="lp min-h-screen overflow-x-clip">
-      <p className="border-b border-ink/60 px-4 py-2 text-center text-[13px] text-ink-soft">Платформа в разработке: часть экранов кабинета работает на демо-данных. <Link to="/register" className="underline underline-offset-2 hover:text-ink">Создать рабочее пространство</Link></p>
+      <p className="border-b border-white/20 px-4 py-2 text-center text-[13px] text-ink-soft">Платформа в разработке: часть экранов кабинета работает на демо-данных. <Link to="/register" className="underline underline-offset-2 hover:text-ink">Создать рабочее пространство</Link></p>
       <header className="mx-auto flex max-w-[1180px] items-center justify-between px-4 py-4 sm:px-6">
         <Wordmark className="text-ink" />
         <nav aria-label="Основная" className="hidden items-center gap-8 text-sm text-ink/70 md:flex">
           {NAV.map((n) => <a key={n.href} href={n.href} className="transition-colors hover:text-ink">{n.label}</a>)}
         </nav>
         <div className="hidden items-center gap-5 md:flex">
-          {isAuthenticated ? <Link to="/app" className="rounded-[4px] bg-ink px-4 py-2 text-sm text-white">Кабинет</Link> : (<>
+          {isAuthenticated ? <Link to="/app" className="rounded-[4px] bg-accent px-4 py-2 text-sm font-medium text-black">Кабинет</Link> : (<>
             <Link to="/login" className="text-sm text-ink/70 hover:text-ink">Войти</Link>
-            <Link to="/register" className="rounded-[4px] bg-ink px-4 py-2 text-sm text-white transition-colors hover:bg-accent-deep">Начать</Link>
+            <Link to="/register" className="rounded-[4px] bg-accent px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-accent-strong">Начать</Link>
           </>)}
         </div>
-        <button type="button" className="h-9 border border-ink/40 px-3 text-sm md:hidden" aria-expanded={menu} aria-controls="mm" onClick={() => setMenu((o) => !o)}>Меню</button>
+        <button type="button" className="h-9 border border-white/10 px-3 text-sm md:hidden" aria-expanded={menu} aria-controls="mm" onClick={() => setMenu((o) => !o)}>Меню</button>
       </header>
       {menu && (
-        <nav id="mm" aria-label="Мобильное меню" className="mx-4 mb-3 flex flex-col gap-3 border border-ink/30 bg-white p-4 text-sm md:hidden">
+        <nav id="mm" aria-label="Мобильное меню" className="mx-4 mb-3 flex flex-col gap-3 border border-white/10 bg-surface-1 p-4 text-sm md:hidden">
           {NAV.map((n) => <a key={n.href} href={n.href} onClick={() => setMenu(false)}>{n.label}</a>)}
           <Link to="/login">Войти</Link><Link to="/register" className="font-medium">Начать</Link>
         </nav>
@@ -54,7 +54,7 @@ export function LandingPage() {
         <Pricing authed={isAuthenticated} />
         <FinalCta authed={isAuthenticated} />
       </main>
-      <footer className="border-t border-ink/60">
+      <footer className="border-t border-white/20">
         <div className="mx-auto max-w-[1180px] px-4 py-10 text-[13px] text-ink/60 sm:px-6">
           <Wordmark className="text-ink" />
           <p className="mt-4 max-w-[520px]">© {new Date().getFullYear()} {PRODUCT_NAME}. Платформа — слой аналитики и поддержки решений поверх 1С; не заменяет 1С и не является аудиторским заключением.</p>
