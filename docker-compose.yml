@@ -76,6 +76,7 @@ services:
 
   frontend:
     build: ./frontend
+    image: ghcr.io/johnbosska/advisortech-frontend:${IMAGE_TAG:-local}
     container_name: techadviser-frontend
     restart: unless-stopped
     depends_on:
@@ -86,6 +87,7 @@ services:
 
   api:
     build: .
+    image: ghcr.io/johnbosska/advisortech-api:${IMAGE_TAG:-local}
     container_name: techadviser-api
     restart: unless-stopped
     environment: *api-env
@@ -106,6 +108,7 @@ services:
 
   migrate:
     build: .
+    image: ghcr.io/johnbosska/advisortech-api:${IMAGE_TAG:-local}
     container_name: techadviser-migrate
     restart: "no"
     command: ["alembic", "upgrade", "head"]
@@ -126,6 +129,7 @@ services:
 
   temporal-worker:
     build: .
+    image: ghcr.io/johnbosska/advisortech-api:${IMAGE_TAG:-local}
     container_name: techadviser-temporal-worker
     command: ["bash", "cmd/run_worker.sh"]
     environment:
