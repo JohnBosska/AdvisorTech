@@ -842,7 +842,7 @@ wheels = [
 ]
 
 [[package]]
-name = "salon-booking-api"
+name = "techadviser-api"
 version = "0.2.0"
 source = { virtual = "." }
 dependencies = [

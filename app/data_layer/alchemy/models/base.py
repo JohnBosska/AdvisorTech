@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Self
 
-from sqlalchemy import select
+from sqlalchemy import DateTime, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -9,9 +9,11 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 class BaseModel(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
     updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )

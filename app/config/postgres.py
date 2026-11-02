@@ -6,12 +6,12 @@ class AlchemyConf(BaseSettings):
     host: str = "localhost"
     port: int = 5432
     username: str = Field(
-        default="salon_booking",
+        default="techadviser",
         validation_alias=AliasChoices("POSTGRES_USER", "POSTGRES_USERNAME"),
     )
     password: str = ""
     database: str = Field(
-        default="salon_booking",
+        default="techadviser",
         validation_alias=AliasChoices("POSTGRES_DB", "POSTGRES_DATABASE"),
     )
     pool_size: int = 10

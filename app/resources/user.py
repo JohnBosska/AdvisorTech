@@ -177,7 +177,7 @@ class UserEntity(BaseEntity[User]):
             await schedule_email(
                 EmailPayload(
                     recipient=email,
-                    subject="Подтверждение email — Salon Booking",
+                    subject="Подтверждение email — Tech Adviser",
                     text_body=(
                         f"Код подтверждения: {code}\n"
                         f"Срок действия: {auth.email_verification_ttl_seconds} секунд.\n"

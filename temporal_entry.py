@@ -6,7 +6,7 @@ from app.temporal.worker import run_worker
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Salon Booking Temporal worker")
+    parser = argparse.ArgumentParser(description="Tech Adviser Temporal worker")
     parser.parse_args()
     configure_logging()
     asyncio.run(run_worker())

@@ -28,7 +28,7 @@ def create_access_token(user: User) -> str:
             "role": user.role.value,
             "iat": now,
             "exp": now + auth.access_token_ttl_seconds,
-            "iss": "salon-booking-api",
+            "iss": "techadviser-api",
         },
         secret,
         algorithm="HS256",
@@ -43,7 +43,7 @@ def decode_access_token(token: str) -> dict[str, object]:
             token,
             secret,
             algorithms=["HS256"],
-            issuer="salon-booking-api",
+            issuer="techadviser-api",
         )
     except PyJWTError as exc:
         raise InvalidTokenError("Invalid access token") from exc

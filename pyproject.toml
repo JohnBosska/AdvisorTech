@@ -1,7 +1,7 @@
 [project]
-name = "salon-booking-api"
+name = "techadviser-api"
 version = "0.2.0"
-description = "API онлайн-записи для салона и барбершопа"
+description = "Tech Adviser: AI-платформа бизнес-аналитики для МСП на данных 1С"
 requires-python = ">=3.14,<3.15"
 dependencies = [
     "fastapi==0.141.1",

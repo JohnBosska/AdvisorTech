@@ -16,7 +16,9 @@ from app.exception_handlers import (
 )
 from app.exceptions import APIError, AuthConfigurationError
 from app.middleware import RequestContextMiddleware
+from app.routers.agent import router as agent_router
 from app.routers.auth import router as auth_router
+from app.routers.organizations import router as organizations_router
 
 configure_logging()
 
@@ -30,8 +32,8 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="Salon Booking API",
-    version="0.2.0",
+    title="Tech Adviser API",
+    version="0.4.0",
     lifespan=lifespan,
     exception_handlers={
         APIError: handle_api_error,
@@ -42,6 +44,8 @@ app = FastAPI(
 )
 app.add_middleware(RequestContextMiddleware)
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(agent_router, prefix="/api/v1")
+app.include_router(organizations_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
@@ -50,7 +54,7 @@ def health_check():
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Salon Booking API")
+    parser = argparse.ArgumentParser(description="Tech Adviser API")
     parser.add_argument("--host", default=os.getenv("HOST", "0.0.0.0"))
     parser.add_argument("--port", type=int, default=os.getenv("PORT", "8000"))
     args = parser.parse_args()
