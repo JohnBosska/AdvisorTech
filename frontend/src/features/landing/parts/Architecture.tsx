@@ -59,7 +59,7 @@ export function Architecture() {
           {['Raw', 'Staging', 'Core', 'Marts'].map((l) => <span key={l} className="flex w-full flex-1 items-center justify-center border-b border-white/10 bg-surface-3/70 last:border-0">{l}</span>)}
         </div>
         <div className={`${box} left-[73%] top-[36%] h-[11%] w-[15%] bg-surface-2`}>Аналитика / KPI</div>
-        <div className={`${box} left-[73%] top-[51%] h-[11%] w-[15%] bg-surface-2`}>AI-аналитик · Qdrant</div>
+        <div className={`${box} left-[73%] top-[51%] h-[11%] w-[15%] bg-surface-2`}>AI-аналитик · pgvector</div>
         <div className={`${box} left-[73%] top-[66%] h-[11%] w-[15%] bg-surface-2`}>Excel-отчёты</div>
         <svg viewBox="0 0 1000 640" className="pointer-events-none absolute inset-0 h-full w-full" fill="none" aria-hidden>
           {[

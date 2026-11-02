@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:18
+        image: pgvector/pgvector:pg18
         env:
           POSTGRES_DB: techadviser
           POSTGRES_USER: techadviser
@@ -42,10 +42,11 @@ jobs:
           enable-cache: true
       - run: uv sync --locked --all-groups
       - run: uv run ruff check .
-      - run: uv run pytest -q
-      - name: Migrations apply and roll back cleanly
+      - name: Apply migrations
+        run: uv run alembic upgrade head
+      - run: uv run pytest -q  # includes the pgvector/full-text integration tests
+      - name: Migrations roll back and re-apply cleanly
         run: |
-          uv run alembic upgrade head
           uv run alembic downgrade base
           uv run alembic upgrade head
 

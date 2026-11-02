@@ -17,8 +17,12 @@ def test_tokens_are_prefixed_unique_and_hashed() -> None:
 
 def test_batch_counters_must_add_up() -> None:
     BatchRequest(
-        sequence=1, entity="sales", records_received=3, records_accepted=1,
-        records_rejected=1, records_quarantined=1,
+        sequence=1,
+        entity="sales",
+        records_received=3,
+        records_accepted=1,
+        records_rejected=1,
+        records_quarantined=1,
     )
     with pytest.raises(ValidationError):
         BatchRequest(sequence=1, entity="sales", records_received=3, records_accepted=1)

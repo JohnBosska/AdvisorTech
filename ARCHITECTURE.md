@@ -18,7 +18,8 @@ Temporal, `uv`. Frontend: React 19 + TypeScript + Vite (см. [FRONTEND_ARCHITEC
 | Сессии | Refresh-токен в HttpOnly-cookie `ta_refresh` (путь `/api/v1/auth`), ротация и отзыв семейства при повторном использовании: `POST /auth/refresh`, `POST /auth/logout` |
 | Участники | Список, смена роли, удаление (только `OWNER`, всегда остаётся хотя бы один владелец); приглашения по email с одноразовым токеном (письмо не отправляется — токен отдаётся владельцу) |
 | Connector Agent API | Токен агента на одно подключение (`agt_…`, хранится хеш). `/api/v1/agent/*`: heartbeat, очередь запусков, start, пакеты (идемпотентны по `sequence`), finish. Хранится только журнал счётчиков: данные записей не сохраняются, Data Warehouse не построен |
-| Миграция | `0003_tenants_integrations`, `0004_sessions_members_agents` (применены на PostgreSQL 18 при старте compose) |
+| AI-аналитик (RAG) | База знаний организации: документы режутся на фрагменты (`knowledge_chunks`), поиск = полнотекстовый `russian` + векторный **pgvector** (HNSW, cosine), результаты сливаются RRF. Векторы включаются ключом `AI_EMBEDDING_API_KEY` (Voyage); без него работает только полнотекстовый поиск. Любой запрос фильтруется по `organization_id`. Чат: `/organizations/{id}/chat/...`, ответ строго по найденным источникам со ссылками `[N]`, при отсутствии источников модель не вызывается. LLM — Anthropic (`AI_ANTHROPIC_API_KEY`); без ключа 503. Данных 1С в ответах нет: хранилище не построено |
+| Миграция | `0003_tenants_integrations`, `0004_sessions_members_agents`, `0005_knowledge_and_chat` (расширение `vector`; применены на PostgreSQL 18 при старте compose) |
 
 API: `POST/GET /api/v1/organizations`, `GET /api/v1/organizations/{id}`,
 `GET/POST /api/v1/organizations/{id}/connections`, `GET .../connections/{cid}/sync-runs`.
@@ -28,7 +29,7 @@ API: `POST/GET /api/v1/organizations`, `GET /api/v1/organizations/{id}`,
 Connector Registry и Connector Agent, Integration Gateway, Ingestion (пакеты, повторы, идемпотентность),
 Data Warehouse (Raw/Staging/Core/Marts, развёртывание отдельной PostgreSQL на клиента), Data Quality,
 Analytics/KPI Dictionary, Inventory, Logistics, Financial Reporting (сопоставление счетов, РСБУ),
-AI (LLM-провайдер, Qdrant, SQL/Python-инструменты), Reports (Excel на сервере), Audit, биллинг.
+AI-инструменты SQL/Python над Data Warehouse, Reports (Excel на сервере), Audit, биллинг.
 Тестовый и демонстрационный код во frontend помечен «Демо-данные» и не должен выдаваться за реальную интеграцию.
 
 ## Принципы

@@ -18,6 +18,7 @@ from app.exceptions import APIError, AuthConfigurationError
 from app.middleware import RequestContextMiddleware
 from app.routers.agent import router as agent_router
 from app.routers.auth import router as auth_router
+from app.routers.knowledge import router as knowledge_router
 from app.routers.organizations import router as organizations_router
 
 configure_logging()
@@ -33,7 +34,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="Tech Adviser API",
-    version="0.4.0",
+    version="0.5.0",
     lifespan=lifespan,
     exception_handlers={
         APIError: handle_api_error,
@@ -46,6 +47,7 @@ app.add_middleware(RequestContextMiddleware)
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(agent_router, prefix="/api/v1")
 app.include_router(organizations_router, prefix="/api/v1")
+app.include_router(knowledge_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])

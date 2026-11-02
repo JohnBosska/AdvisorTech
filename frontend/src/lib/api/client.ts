@@ -23,7 +23,7 @@ export function configureApiClient(opts: { getToken?: () => string | null; onUna
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST'
+  method?: 'GET' | 'POST' | 'DELETE'
   body?: unknown
   signal?: AbortSignal
   /** A 401 here means bad credentials, not an expired session. */
@@ -49,7 +49,7 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
     throw new ApiError(0, 'network')
   }
 
-  if (response.ok) return (await response.json()) as T
+  if (response.ok) return (response.status === 204 ? undefined : await response.json()) as T
 
   let detail = ''
   try {

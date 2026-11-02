@@ -26,7 +26,7 @@ Before any frontend task, read only the documents relevant to the assigned scope
 
 1. `FRONTEND_ARCHITECTURE.md` — frontend boundaries, technology stack, routes, API integration, project structure, quality gates.
 2. `FRONTEND_DESIGN_SYSTEM.md` — visual reference, tokens, layout, hero art direction, animation, visual QA.
-3. Root `ARCHITECTURE.md` — backend contracts, tenant model, 1C integration, PostgreSQL/Qdrant/Temporal responsibilities.
+3. Root `ARCHITECTURE.md` — backend contracts, tenant model, 1C integration, PostgreSQL (+ pgvector)/Temporal responsibilities.
 4. Root `AGENTS.md` — repository rules and backend agent boundaries.
 
 Do not repeatedly paste entire documents into agent prompts. Provide links/paths and a short task-specific excerpt or checklist.
@@ -122,7 +122,7 @@ A compact design brief containing: screens/sections, component list, token usage
 
 - Do not create an independent standalone Vite site from the supplied particle archive.
 - Do not leave a fixed full-screen Three.js canvas behind all application pages.
-- Do not query PostgreSQL, Qdrant, or 1C directly from browser code.
+- Do not query PostgreSQL (including pgvector) or 1C directly from browser code.
 - Do not expose secrets in `VITE_*` environment variables.
 - Do not store authoritative business calculations in frontend components.
 - Do not add a new library without checking whether the existing stack already solves the problem.
@@ -365,7 +365,7 @@ Do not claim a command passed unless it was actually executed and its exit statu
 - [ ] Date filters and supported table interactions work.
 - [ ] AI Analyst clearly distinguishes evidence-backed numeric results from generated narrative.
 - [ ] Report download works with an actual backend response or is clearly marked as demo-only.
-- [ ] No browser code accesses PostgreSQL, Qdrant, or the customer's 1C directly.
+- [ ] No browser code accesses PostgreSQL, pgvector, or the customer's 1C directly.
 
 ### 9.2 Hero acceptance
 

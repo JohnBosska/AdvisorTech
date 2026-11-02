@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { answerQuestion } from './ai'
 import { balanceSheet, dashboard, groupRows, incomeStatement, PERIODS, ranges } from './data'
 
 describe('demo dataset consistency', () => {
@@ -21,23 +20,5 @@ describe('demo dataset consistency', () => {
       const p = Object.fromEntries(incomeStatement(key).map((l) => [l.id, l.current]))
       expect(p.rev + p.cogs).toBeCloseTo(p.gross, 6) // cogs is shown negative
     }
-  })
-})
-
-describe('demo AI analyst', () => {
-  it('answers with structure and flags hypotheses separately', () => {
-    const a = answerQuestion('В каких группах самая низкая маржа?', 'Q1')
-    expect(a.refusal).toBeUndefined()
-    expect(a.metrics.length).toBeGreaterThan(0)
-    expect(a.hypotheses.length).toBeGreaterThan(0)
-    expect(a.sources.length).toBeGreaterThan(0)
-  })
-  it('refuses unsupported questions instead of inventing numbers', () => {
-    const a = answerQuestion('Какая погода завтра?', 'Q1')
-    expect(a.refusal).toBeTruthy()
-    expect(a.metrics).toHaveLength(0)
-  })
-  it('refuses to explain a change when there is no previous period', () => {
-    expect(answerQuestion('Почему изменилась прибыль?', 'M12').refusal).toBeTruthy()
   })
 })
