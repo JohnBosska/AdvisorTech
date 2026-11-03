@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { DotIcon, Label } from './Blocks'
+import { Label } from './Blocks'
+import { PLAN_WIDGETS } from './PlanWidgets'
 
 const PLAN = [
   { icon: 'burst', t: 'Интеграция с 1С', d: 'Поддерживаемые конфигурации, только чтение, агент у вас.' },
@@ -15,9 +16,10 @@ export function Pricing({ authed }: { authed: boolean }) {
       <h2 className="mt-5 max-w-[900px] text-[clamp(1.8rem,3.6vw,3rem)] font-normal leading-[1.1] tracking-[-0.03em]">Один тариф вместо нескольких систем и специалистов.</h2>
       <p className="mt-5 max-w-[600px] text-sm leading-relaxed text-ink/60">Стоимость, пробный период и лимиты ещё не определены — мы не показываем цен, пока они не утверждены. Условия пилота обсуждаем при подключении.</p>
       <Link to={authed ? '/app/subscription' : '/register'} className="mt-6 inline-block px-1 text-sm text-ink/50 hover:text-ink">Запросить условия пилота →</Link>
-      <div className="mt-16 grid gap-x-12 gap-y-20 sm:grid-cols-2">
-        {PLAN.map((p) => <div key={p.t} className="px-1"><h3 className="text-[1.4rem] font-normal tracking-tight">{p.t}</h3><p className="mt-3 max-w-[420px] text-sm text-ink/60">{p.d}</p><div className="mt-10"><DotIcon kind={p.icon} /></div></div>)}
+      <div className="mt-16 grid gap-x-12 gap-y-16 sm:grid-cols-2">
+        {PLAN.map((p) => { const W = PLAN_WIDGETS[p.icon]; return <div key={p.t} className="flex flex-col px-1"><h3 className="text-[1.4rem] font-normal tracking-tight">{p.t}</h3><p className="mt-3 max-w-[420px] text-sm text-ink/60">{p.d}</p><div className="mt-auto pt-8"><W /></div></div> })}
       </div>
+      <p className="mt-10 text-xs text-ink-soft">Виджеты — иллюстрации принципа, а не живые данные.</p>
     </section>
   )
 }

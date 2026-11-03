@@ -115,3 +115,13 @@ dialog::backdrop { background: rgb(0 0 0 / 72%); backdrop-filter: blur(2px); }
 @keyframes scene-float { to { transform: translate3d(14px, -22px, 0); } }
 @media (max-width: 767px) { .scene-beam:nth-of-type(n+5), .scene-dust:nth-of-type(n+30) { display: none; } .scene-rays { opacity: .3; } }
 @media (prefers-reduced-motion: reduce) { .scene-emerald, .scene-amber, .scene-rays, .scene-beam, .scene-dust { animation: none !important; } }
+
+/* ---- plan widgets ---- */
+.plan-widget { transition: border-color .3s, box-shadow .3s; }
+.plan-widget:hover { border-color: rgb(52 213 154 / 35%); box-shadow: 0 0 40px -18px rgb(52 213 154 / 45%); }
+@keyframes plan-grow { from { transform: scaleX(.2); } to { transform: scaleX(1); } }
+@keyframes plan-rise { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+@keyframes plan-pulse { 50% { opacity: .35; } }
+.plan-grow { transform-origin: left; animation: plan-grow 1.6s cubic-bezier(.2,.7,.2,1) both; }
+.plan-rise { transform-origin: bottom; animation: plan-rise 1.2s cubic-bezier(.2,.7,.2,1) both; }
+.plan-pulse { animation: plan-pulse 2.4s ease-in-out infinite; }
