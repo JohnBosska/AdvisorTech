@@ -11,10 +11,10 @@ export function Hero({ authed }: { authed: boolean }) {
       <div className="relative mx-auto flex min-h-[min(88vh,820px)] max-w-[1180px] flex-col justify-center px-4 pb-24 pt-20 sm:px-6 lg:pb-32">
         <p className="mb-7 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--cine-champagne)]/80">Ваш бизнес. Одна умная система.</p>
         <h1 className="lp-display max-w-[900px] text-[clamp(2.6rem,7vw,5.8rem)] text-[var(--cine-white)]">
-          У вашего бизнеса есть мозг. <span className="text-[var(--cine-white)]/55">Теперь он умеет думать.</span>
+          Интеллект, который <span className="text-[var(--cine-white)]/55">знает ваш бизнес.</span>
         </h1>
         <p className="mt-8 max-w-[600px] text-[17px] leading-relaxed text-[var(--cine-white)]/65">
-          Tech Adviser собирает документы и знания компании в единую RAG-систему: команда быстро находит ответы со ссылками на источники и принимает решения на проверенных фактах. Данные 1С подключаются поэтапно.
+          Объединяем документы, данные и корпоративные знания в единую AI-экосистему, которая находит нужную информацию, понимает контекст и помогает принимать решения.
         </p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
           <a href="#brain" className="cine-btn-primary group inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 text-sm font-medium">
