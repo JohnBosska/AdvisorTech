@@ -156,10 +156,11 @@ const FRAG = /* glsl */ `
     float a = texture2D(uMap, uv).a;
     if (a < 0.08) discard;
 
-    vec3 neon = vec3(0.16, 1.0, 0.46);
+    vec3 neon = vec3(0.125, 0.72, 0.48);
     vec3 base = mix(uBottom, uTop, smoothstep(-0.45, 0.55, vY));
     vec3 c = mix(base, neon, vS * 0.85);
-    float bright = (0.55 + 0.45 * vLight) * (1.0 + vS * 0.35);
+    // core (low |y|, centre) warmer ivory, outer shell emerald/mint; kept below clipping
+    float bright = (0.42 + 0.4 * vLight) * (1.0 + vS * 0.25);
     float alpha = a * vLight * (0.65 + 0.35 * vSeed);
 
     if (uMode > 0.5) {
@@ -188,8 +189,8 @@ export function createParticleMaterial(atlas: THREE.Texture, { lag = 0, mode = 0
       uMode: { value: mode },
       uGain: { value: gain },
       uSize: { value: size },
-      uTop: { value: new THREE.Vector3(0.86, 0.92, 0.89) },
-      uBottom: { value: new THREE.Vector3(0.28, 0.86, 0.5) },
+      uTop: { value: new THREE.Vector3(0.72, 0.92, 0.83) },
+      uBottom: { value: new THREE.Vector3(0.13, 0.62, 0.42) },
     },
   });
 }

@@ -32,8 +32,8 @@ export function createLaptop() {
   const BH = 0.09;    // толщина основания
   const LH = 2.2;     // высота крышки
 
-  const aluminium = new THREE.MeshStandardMaterial({ color: 0x1c1f26, metalness: 0.92, roughness: 0.36 });
-  const darkMetal = new THREE.MeshStandardMaterial({ color: 0x0b0d11, metalness: 0.7, roughness: 0.5 });
+  const aluminium = new THREE.MeshStandardMaterial({ color: 0x232b27, metalness: 0.85, roughness: 0.4 });
+  const darkMetal = new THREE.MeshStandardMaterial({ color: 0x0c110e, metalness: 0.7, roughness: 0.5 });
 
   /* ---------- основание ---------- */
   const base = new THREE.Mesh(new RoundedBoxGeometry(W, BH, D, 4, 0.04), aluminium);
@@ -61,7 +61,7 @@ export function createLaptop() {
 
   const keyMat = new THREE.MeshStandardMaterial({
     color: 0x0f1217, metalness: 0.5, roughness: 0.42,
-    emissive: 0x03140a, emissiveIntensity: 1.0,
+    emissive: 0x04180e, emissiveIntensity: 1.0,
   });
   const keyMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.2, 0.03, 0.17), keyMat, keys.length);
   const m = new THREE.Matrix4();
@@ -78,7 +78,7 @@ export function createLaptop() {
   /* ---------- тачпад ---------- */
   const pad = new THREE.Mesh(
     new RoundedBoxGeometry(1.2, 0.008, 0.72, 2, 0.012),
-    new THREE.MeshStandardMaterial({ color: 0x1f232b, metalness: 0.8, roughness: 0.3 })
+    new THREE.MeshStandardMaterial({ color: 0x28312c, metalness: 0.8, roughness: 0.32 })
   );
   pad.position.set(0, BH + 0.003, 0.7);
   group.add(pad);

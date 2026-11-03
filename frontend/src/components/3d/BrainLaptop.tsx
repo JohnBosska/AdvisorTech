@@ -55,10 +55,9 @@ export function BrainLaptop() {
       aria-label="Интерактивный ноутбук: нажмите, чтобы рассыпать и снова собрать мозг из символов"
       onClick={() => trigger.current?.()}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.current?.() } }}
-      className="relative aspect-[5/4] w-full cursor-pointer rounded-[var(--radius-lg)] outline-offset-4 lg:aspect-[6/5]"
+      className="relative aspect-[5/4] w-full cursor-pointer rounded-[var(--radius-lg)] outline-offset-4 lg:aspect-[7/6]"
     >
-      <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'var(--gradient-glow)' }} aria-hidden />
-      <div className="absolute inset-0" style={{ maskImage: 'radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 50% 50% at 50% 50%, #000 62%, transparent 100%)' }}>
+      <div className="absolute inset-0" style={{ maskImage: 'radial-gradient(ellipse 50% 50% at 50% 50%, #000 66%, transparent 100%)', WebkitMaskImage: 'radial-gradient(ellipse 50% 50% at 50% 50%, #000 66%, transparent 100%)' }}>
       {gl ? (
         <Suspense fallback={<Fallback />}>
           <Scene reducedMotion={reduced} points={points} active={active} trigger={trigger} />

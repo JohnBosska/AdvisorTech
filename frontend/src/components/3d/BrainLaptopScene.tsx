@@ -7,6 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js'
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { createBrainGeometry } from './brain'
+import { createCore, createFloor, createNeuralLines } from './environment'
 import { createLaptop } from './laptop'
 import { createParticleGeometry, createParticleMaterial, makeGlyphAtlas } from './particles'
 
@@ -14,9 +15,9 @@ import { createParticleGeometry, createParticleMaterial, makeGlyphAtlas } from '
 // 0 = brain assembled, 0…0.56 scatter, 0.56…0.72 hover, 0.60…1 reassemble (per-particle delay).
 const EXPLOSION_SECONDS = 8.5
 const INTRO_SECONDS = 3.6
-const BLOOM_BASE = 0.34
-const BLOOM_PEAK = 0.5
-const SCREEN_LIGHT_MAX = 7
+const BLOOM_BASE = 0.2
+const BLOOM_PEAK = 0.42
+const SCREEN_LIGHT_MAX = 5
 
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3)
 const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
@@ -46,11 +47,16 @@ function Scene({ reducedMotion, points, trigger }: SceneProps) {
       pts.renderOrder = idx
       brain.add(pts)
     })
+    const neural = createNeuralLines(brainGeo)
+    const core = createCore()
+    brain.add(neural, core)
+    const floor = createFloor()
+    laptop.group.add(floor.group)
     laptop.brainAnchor.add(brain)
-    const screenLight = new THREE.PointLight(0x39ff85, SCREEN_LIGHT_MAX, 6, 1.6)
+    const screenLight = new THREE.PointLight(0x20b77b, SCREEN_LIGHT_MAX, 6, 1.6)
     screenLight.position.set(0, 0, 0.9)
     laptop.brainAnchor.add(screenLight)
-    return { laptop, brain, screenLight, materials: [mainMat, ...trailMats], geometries: [brainGeo, particleGeo], atlas }
+    return { laptop, brain, neural, core, floor, screenLight, materials: [mainMat, ...trailMats], geometries: [brainGeo, particleGeo], atlas }
   }, [points, pr])
 
   const composer = useMemo(() => {
@@ -65,17 +71,25 @@ function Scene({ reducedMotion, points, trigger }: SceneProps) {
     gl.toneMapping = THREE.ACESFilmicToneMapping
     gl.toneMappingExposure = 1
     scene.background = null
-    const ambient = new THREE.AmbientLight(0x0c1210, 1)
-    const rim = new THREE.DirectionalLight(0xbfd8ff, 1.6)
+    const ambient = new THREE.AmbientLight(0x0d1a14, 1.4)
+    // emerald backlight from upper-left, warm amber side light from the right, mint fill from the front
+    const rim = new THREE.DirectionalLight(0x20b77b, 2.4)
     rim.position.set(-3.5, 4.5, -2.5)
-    const fill = new THREE.DirectionalLight(0x5cffa0, 0.25)
-    fill.position.set(3.5, 2, 3)
-    scene.add(ambient, rim, fill, parts.laptop.group)
+    const amber = new THREE.DirectionalLight(0xc58a50, 1.5)
+    amber.position.set(5, 1.6, 0.8)
+    const fill = new THREE.DirectionalLight(0xb8ebd3, 0.3)
+    fill.position.set(2.5, 2.5, 3.5)
+    scene.add(ambient, rim, amber, fill, parts.laptop.group)
     return () => {
-      scene.remove(ambient, rim, fill, parts.laptop.group)
+      scene.remove(ambient, rim, amber, fill, parts.laptop.group)
       parts.materials.forEach((m) => m.dispose())
       parts.geometries.forEach((g) => g.dispose())
       parts.atlas.dispose()
+      parts.floor.dispose()
+      parts.neural.geometry.dispose()
+      ;(parts.neural.material as THREE.Material).dispose()
+      ;(parts.core.material as THREE.SpriteMaterial).map?.dispose()
+      parts.core.material.dispose()
       composer.dispose()
     }
   }, [gl, scene, parts, composer])
@@ -113,6 +127,8 @@ function Scene({ reducedMotion, points, trigger }: SceneProps) {
     const bloom = composer.passes[1] as UnrealBloomPass
     bloom.strength = BLOOM_BASE + (BLOOM_PEAK - BLOOM_BASE) * sg
     parts.screenLight.intensity = SCREEN_LIGHT_MAX * (1 - 0.8 * sg)
+    ;(parts.neural.material as THREE.LineBasicMaterial).opacity = 0.16 * (1 - sg)
+    parts.core.material.opacity = 1 - sg
     parts.laptop.screenMaterial.color.setScalar(1 - 0.85 * sg)
 
     const m = mouse.current
