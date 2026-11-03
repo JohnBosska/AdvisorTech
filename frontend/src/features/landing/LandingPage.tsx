@@ -5,6 +5,7 @@ import { PRODUCT_NAME } from '../../config/brand'
 import { useAuth } from '../../lib/auth/AuthProvider'
 import { Architecture } from './parts/Architecture'
 import { Pricing, FinalCta } from './parts/Bottom'
+import { DigitalBrain } from './parts/DigitalBrain'
 import { FeatureStrip } from './parts/FeatureStrip'
 import { Hero } from './parts/Hero'
 import { QualityChart } from './parts/QualityChart'
@@ -45,6 +46,7 @@ export function LandingPage() {
       )}
       <main>
         <Hero authed={isAuthenticated} />
+        <DigitalBrain />
         <FeatureStrip />
         <VerifyFlow />
         <ScaleSection />

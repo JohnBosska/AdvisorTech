@@ -1,39 +1,32 @@
 import { ArrowRight } from 'lucide-react'
-import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { PRODUCT_NAME } from '../../../config/brand'
-import { LogoMark } from '../../../components/navigation/Wordmark'
-import { BarsCanvas } from './BarsCanvas'
+import { LightStructures } from './LightStructures'
 
-const BrainLaptop = lazy(() => import('../../../components/3d/BrainLaptop'))
 const STRIP = ['1С:Бухгалтерия', '1С:Управление торговлей', '1С:ERP', 'PostgreSQL', 'pgvector', 'MS SQL Server', 'Temporal']
 
 export function Hero({ authed }: { authed: boolean }) {
   return (
-    <section>
-      <div className="mx-auto max-w-[1180px] px-4 sm:px-6">
-        <div className="relative isolate min-h-[620px] overflow-hidden bg-black lg:min-h-[560px]">
-          <BarsCanvas />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" aria-hidden />
-          <div className="absolute right-0 top-0 h-[58%] w-full lg:h-full lg:w-[55%]">
-            <Suspense fallback={null}><BrainLaptop /></Suspense>
-          </div>
-          <div className="relative flex min-h-[620px] flex-col justify-end p-6 sm:p-10 lg:min-h-[560px]">
-            <p className="mb-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[#9aa09c]"><LogoMark className="h-4 w-4" />{PRODUCT_NAME} · AI-аналитика поверх 1С</p>
-            <h1 className="lp-display max-w-[760px] text-[clamp(2.4rem,5.4vw,4.4rem)] text-[#eef2ee]">
-              Данные <a href="#how" className="underline decoration-1 underline-offset-[8px] hover:text-white">1С</a> — в решения для вашего бизнеса.
-            </h1>
-          </div>
+    <section className="cine-hero relative isolate overflow-hidden">
+      <LightStructures />
+      <div className="relative mx-auto flex min-h-[min(88vh,820px)] max-w-[1180px] flex-col justify-center px-4 pb-24 pt-20 sm:px-6 lg:pb-32">
+        <p className="mb-7 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--cine-champagne)]/80">Ваш бизнес. Одна умная система.</p>
+        <h1 className="lp-display max-w-[900px] text-[clamp(2.6rem,7vw,5.8rem)] text-[var(--cine-white)]">
+          У вашего бизнеса есть мозг. <span className="text-[var(--cine-white)]/55">Теперь он умеет думать.</span>
+        </h1>
+        <p className="mt-8 max-w-[600px] text-[17px] leading-relaxed text-[var(--cine-white)]/65">
+          Tech Adviser собирает документы и знания компании в единую RAG-систему: команда быстро находит ответы со ссылками на источники и принимает решения на проверенных фактах. Данные 1С подключаются поэтапно.
+        </p>
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <a href="#brain" className="cine-btn-primary group inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 text-sm font-medium">
+            Познакомиться с цифровым мозгом<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
+          </a>
+          <a href="#how" className="cine-btn-ghost inline-flex items-center justify-center rounded-full px-7 py-3 text-sm">Как это работает</a>
+          <Link to={authed ? '/app' : '/register'} className="px-2 py-3 text-sm text-[var(--cine-white)]/60 underline-offset-4 transition-colors hover:text-[var(--cine-white)] hover:underline">{authed ? 'Открыть кабинет' : 'Создать рабочее пространство'}</Link>
         </div>
-        <div className="flex flex-wrap items-center gap-6 py-6">
-          <Link to={authed ? '/app' : '/register'} className="group inline-flex items-center gap-2 text-sm font-medium">{authed ? 'Открыть кабинет' : 'Начать'}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden /></Link>
-          <a href="#how" className="rounded-full border border-white/20 px-6 py-2.5 text-sm text-ink/70 transition-colors hover:border-ink hover:text-ink">Как это работает</a>
-        </div>
-        <div className="border-t border-white/20" />
-        <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 py-9 text-[15px] font-medium text-ink/55" aria-label="Совместимость">
-          {STRIP.map((s) => <li key={s} className="font-mono text-[13px] tracking-tight">{s}</li>)}
-        </ul>
       </div>
+      <ul className="relative mx-auto flex max-w-[1180px] flex-wrap items-center justify-center gap-x-10 gap-y-4 border-t border-white/10 px-4 py-8 sm:px-6" aria-label="Совместимость">
+        {STRIP.map((s) => <li key={s} className="font-mono text-[13px] tracking-tight text-[var(--cine-white)]/45">{s}</li>)}
+      </ul>
     </section>
   )
 }
