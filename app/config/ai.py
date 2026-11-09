@@ -34,6 +34,8 @@ class AIConf(BaseSettings):
     max_question_chars: int = Field(default=2000, gt=0)
     max_document_chars: int = Field(default=200_000, gt=0)
     messages_per_minute: int = Field(default=12, gt=0)
+    # BI data sources: private/loopback hosts are refused unless explicitly allowed (tests, on-prem).
+    bi_allow_private_hosts: bool = False
 
     model_config = SettingsConfigDict(env_prefix="AI_")
 

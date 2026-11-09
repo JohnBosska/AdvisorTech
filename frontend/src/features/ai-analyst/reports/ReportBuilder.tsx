@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ApiError } from '../../../lib/api/client'
 import { reportsApi, type Aggregation, type Dataset, type Widget, type WidgetType } from '../../../lib/api/reports'
 import { toCsv, widgetError } from './aggregate'
+import { SourcePanel } from './SourcePanel'
 import { WidgetCard, widgetPoints } from './WidgetCard'
 
 const IDEAS = ['Динамика выручки по месяцам', 'Топ-10 товарных групп по сумме', 'Структура продаж по складам', 'Ключевые показатели: итог, среднее, количество']
@@ -67,6 +68,7 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
   const [panel, setPanel] = useState<'ai' | 'manual'>('ai')
+  const [sourceKind, setSourceKind] = useState<'file' | 'onec' | 'postgres'>('file')
   const fileRef = useRef<HTMLInputElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
@@ -83,10 +85,13 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
     if (!file) return
     setBusy('upload'); setError(''); setNote('')
     try {
-      const d = await reportsApi.upload(orgId, file)
-      setData(d); setWidgets([]); setTitle(file.name.replace(/\.[^.]+$/, ''))
-      if (d.truncated) setNote(`В отчёт взяты первые ${d.rows.length.toLocaleString('ru-RU')} строк из ${d.total_rows.toLocaleString('ru-RU')}.`)
+      accept(await reportsApi.upload(orgId, file))
     } catch (e) { setError(explain(e)) } finally { setBusy(null) }
+  }
+
+  const accept = (d: Dataset) => {
+    setData(d); setWidgets([]); setError(''); setTitle(d.filename.replace(/\.(csv|xlsx|txt)$/i, ''))
+    setNote(d.truncated ? `В отчёт взяты первые ${d.rows.length.toLocaleString('ru-RU')} строк${d.total_rows ? ` из ${d.total_rows.toLocaleString('ru-RU')}` : ''}.` : '')
   }
 
   const plan = async (e?: FormEvent, text = prompt) => {
@@ -123,18 +128,32 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
         <aside className="space-y-4 p-4 sm:p-6 lg:overflow-y-auto lg:pr-3">
           <section className="glass p-4">
             <p className="flex items-center gap-2 text-[13px] font-medium text-white"><Table2 className="h-4 w-4 text-[#00e599]" aria-hidden />Данные</p>
-            <input ref={fileRef} type="file" accept=".csv,.xlsx,.txt" className="sr-only" aria-label="Файл с данными" onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = '' }} />
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => { e.preventDefault(); void upload(e.dataTransfer.files[0]) }}
-              className="mt-3 flex w-full flex-col items-center gap-1.5 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-3 py-5 text-center transition hover:border-[#00e599]/50 hover:bg-[#00e599]/[0.04]"
-            >
-              <FileUp className="h-5 w-5 text-white/60" aria-hidden />
-              <span className="text-[13px] text-white">{busy === 'upload' ? 'Читаю файл…' : data ? data.filename : 'Загрузите CSV или XLSX'}</span>
-              <span className="text-[11px] text-white/40">{data ? `${data.total_rows.toLocaleString('ru-RU')} строк · ${data.columns.length} колонок` : 'Выгрузка из 1С, до 5 МБ, первая строка — заголовки'}</span>
-            </button>
+            <div className="mt-3 flex rounded-xl bg-black/30 p-1 text-[12px]" role="tablist" aria-label="Источник данных">
+              {([['file', 'Файл'], ['onec', '1С'], ['postgres', 'PostgreSQL']] as const).map(([id, label]) => (
+                <button key={id} type="button" role="tab" aria-selected={sourceKind === id} onClick={() => setSourceKind(id)} className={`flex-1 rounded-lg py-1.5 transition ${sourceKind === id ? 'bg-white/10 text-white' : 'text-white/50'}`}>{label}</button>
+              ))}
+            </div>
+            {sourceKind === 'file' ? (
+              <>
+                <input ref={fileRef} type="file" accept=".csv,.xlsx,.txt" className="sr-only" aria-label="Файл с данными" onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = '' }} />
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); void upload(e.dataTransfer.files[0]) }}
+                  className="mt-3 flex w-full flex-col items-center gap-1.5 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-3 py-5 text-center transition hover:border-[#00e599]/50 hover:bg-[#00e599]/[0.04]"
+                >
+                  <FileUp className="h-5 w-5 text-white/60" aria-hidden />
+                  <span className="text-[13px] text-white">{busy === 'upload' ? 'Читаю файл…' : 'Загрузите CSV или XLSX'}</span>
+                  <span className="text-[11px] text-white/40">Выгрузка из 1С, до 5 МБ, первая строка — заголовки</span>
+                </button>
+              </>
+            ) : (
+              <SourcePanel key={sourceKind} orgId={orgId} kind={sourceKind} onLoaded={accept} onError={(e) => setError(explain(e))} />
+            )}
+            {data && (
+              <p className="mt-3 truncate text-[12px] text-white/70"><span className="text-[#00e599]">●</span> {data.filename} · {data.total_rows !== null ? `${data.total_rows.toLocaleString('ru-RU')} строк` : `${data.rows.length.toLocaleString('ru-RU')}+ строк`} · {data.columns.length} колонок</p>
+            )}
             {data && (
               <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Колонки">
                 {data.columns.map((c) => <li key={c.name} className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 font-mono text-[10.5px] text-white/65" title={c.samples.join(', ')}><span className={c.type === 'number' ? 'text-[#00e599]' : c.type === 'date' ? 'text-[#5b8def]' : 'text-white/40'}>{c.type === 'number' ? '#' : c.type === 'date' ? '◷' : 'Aa'}</span> {c.name}</li>)}
@@ -148,7 +167,7 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
               <button type="button" role="tab" aria-selected={panel === 'manual'} onClick={() => setPanel('manual')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 transition ${panel === 'manual' ? 'bg-white/10 text-white' : 'text-white/50'}`}><Plus className="h-3.5 w-3.5" aria-hidden />Вручную</button>
             </div>
             <div className="mt-3">
-              {!data && <p className="text-[12px] text-white/45">Сначала загрузите таблицу.</p>}
+              {!data && <p className="text-[12px] text-white/45">Сначала выберите данные: файл, объект 1С или таблицу PostgreSQL.</p>}
               {data && panel === 'ai' && (
                 <form onSubmit={(e) => void plan(e)} className="space-y-2.5">
                   {!aiReady && <p className="text-[12px] text-[#e6b85c]">ИИ-модель на сервере не подключена — соберите отчёт вручную.</p>}
@@ -176,7 +195,7 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
             <div className="glass flex h-full min-h-[320px] flex-col items-center justify-center gap-3 p-8 text-center">
               <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#00e599]/10 text-[#00e599] shadow-[0_0_40px_-8px_rgb(0_229_153/0.6)]"><Sparkles className="h-6 w-6" aria-hidden /></span>
               <p className="text-[18px] font-medium text-white">Опишите отчёт словами</p>
-              <p className="max-w-[420px] text-[13px] leading-relaxed text-white/50">Загрузите таблицу, напишите, что хотите увидеть, и ИИ соберёт дашборд: KPI, графики и таблицы. Виджеты можно удалять и добавлять вручную.</p>
+              <p className="max-w-[420px] text-[13px] leading-relaxed text-white/50">Подключите 1С или PostgreSQL либо загрузите файл, напишите, что хотите увидеть, и ИИ соберёт дашборд: KPI, графики и таблицы. Виджеты можно удалять и добавлять вручную.</p>
             </div>
           ) : data && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">

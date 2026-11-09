@@ -164,7 +164,7 @@ export function ChatColumn({ orgId, orgName, status, conversations, conversation
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#00e599]/15 text-[#00e599]"><LayoutGrid className="h-4 w-4" aria-hidden /></span>
           <span className="min-w-0 flex-1">
             <span className="block text-[13.5px] font-medium text-white">Создать отчёт через ИИ</span>
-            <span className="block truncate text-[11.5px] text-white/55">BI-конструктор: таблица из 1С → дашборд по описанию</span>
+            <span className="block truncate text-[11.5px] text-white/55">BI-конструктор: 1С, PostgreSQL или файл → дашборд</span>
           </span>
           <ChevronRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
         </button>

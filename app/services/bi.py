@@ -33,7 +33,7 @@ def _to_number(value: str) -> float | None:
     return float(text.replace(",", "."))
 
 
-def _cell(value) -> str:
+def cell(value) -> str:
     if value is None:
         return ""
     if isinstance(value, datetime):
@@ -44,6 +44,8 @@ def _cell(value) -> str:
         )
     if isinstance(value, date):
         return value.isoformat()
+    if isinstance(value, (bytes, bytearray, memoryview)):
+        return "0x" + bytes(value)[:16].hex()
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return str(value).strip()
@@ -58,7 +60,7 @@ def _read_rows(filename: str, data: bytes) -> list[list[str]]:
             raise BadRequestError("Не удалось прочитать XLSX") from exc
         sheet = book.worksheets[0]
         rows = [
-            [_cell(v) for v in row]
+            [cell(v) for v in row]
             for _, row in zip(range(MAX_ROWS + 2), sheet.iter_rows(values_only=True))
         ]
         book.close()
@@ -88,19 +90,26 @@ def parse_dataset(filename: str, data: bytes) -> dict:
     raw = [r for r in _read_rows(filename, data) if any(c for c in r)]
     if len(raw) < 2:
         raise BadRequestError("Нужна строка заголовков и хотя бы одна строка данных")
-    header, body = raw[0][:MAX_COLUMNS], raw[1:]
+    return build_dataset(filename, raw[0], raw[1:], total_rows=len(raw) - 1)
+
+
+def build_dataset(
+    name: str, header: list[str], body: list[list[str]], *, total_rows: int | None
+) -> dict:
+    """Shared by files, 1C OData and PostgreSQL: string cells in, typed columns and rows out."""
+    header = header[:MAX_COLUMNS]
     names: list[str] = []
     for i, h in enumerate(header):
         base = (h or f"Колонка {i + 1}")[:120]
-        name, n = base, 2
-        while name in names:
-            name, n = f"{base} ({n})", n + 1
-        names.append(name)
+        unique, n = base, 2
+        while unique in names:
+            unique, n = f"{base} ({n})", n + 1
+        names.append(unique)
     truncated = len(body) > MAX_ROWS
     body = body[:MAX_ROWS]
 
     columns, typed = [], {}
-    for i, name in enumerate(names):
+    for i, col in enumerate(names):
         values = [r[i] if i < len(r) else "" for r in body]
         filled = [v for v in values if v]
         nums = [_to_number(v) for v in filled]
@@ -113,21 +122,21 @@ def parse_dataset(filename: str, data: bytes) -> dict:
             kind = "date"
         else:
             kind = "text"
-        typed[name] = kind
-        columns.append(DatasetColumn(name=name, type=kind, samples=[v[:60] for v in filled[:3]]))
+        typed[col] = kind
+        columns.append(DatasetColumn(name=col, type=kind, samples=[v[:60] for v in filled[:3]]))
 
     rows = []
     for r in body:
         row: dict[str, str | float | None] = {}
-        for i, name in enumerate(names):
+        for i, col in enumerate(names):
             v = r[i] if i < len(r) else ""
-            row[name] = (_to_number(v) if v else None) if typed[name] == "number" else (v or None)
+            row[col] = (_to_number(v) if v else None) if typed[col] == "number" else (v or None)
         rows.append(row)
     return {
-        "filename": filename[:200],
+        "filename": name[:200],
         "columns": columns,
         "rows": rows,
-        "total_rows": len(raw) - 1,
+        "total_rows": total_rows,
         "truncated": truncated,
     }
 

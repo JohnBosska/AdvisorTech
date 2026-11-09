@@ -17,7 +17,7 @@ class DatasetResponse(BaseModel):
     filename: str
     columns: list[DatasetColumn]
     rows: list[dict[str, str | float | None]]
-    total_rows: int
+    total_rows: int | None  # None: source has more rows than were read
     truncated: bool
 
 
@@ -48,3 +48,34 @@ class ReportPlanRequest(BaseModel):
 class ReportPlanResponse(ReportSpec):
     model: str
     dropped: int = 0  # widgets the model proposed that failed validation
+
+
+class PostgresSource(BaseModel):
+    host: str = Field(min_length=1, max_length=253)
+    port: int = Field(default=5432, ge=1, le=65535)
+    database: str = Field(min_length=1, max_length=63)
+    user: str = Field(min_length=1, max_length=63)
+    password: str = Field(default="", max_length=256)
+    ssl: bool = True
+
+
+class ODataSource(BaseModel):
+    url: str = Field(min_length=8, max_length=500, pattern=r"^https?://")
+    user: str = Field(default="", max_length=120)
+    password: str = Field(default="", max_length=256)
+
+
+class SourceTablesRequest(BaseModel):
+    kind: Literal["postgres", "onec"]
+    postgres: PostgresSource | None = None
+    onec: ODataSource | None = None
+
+
+class SourceTable(BaseModel):
+    name: str
+    label: str
+    rows: int | None = None
+
+
+class SourceLoadRequest(SourceTablesRequest):
+    table: str = Field(min_length=1, max_length=300)
