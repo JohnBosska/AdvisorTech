@@ -2,17 +2,19 @@ import aiohttp
 
 from app.config.ai import ai
 from app.exceptions import ServiceUnavailableError
-from app.services import gigachat
+from app.services import deepseek, gigachat
 
 _URL = "https://api.voyageai.com/v1/embeddings"
 _BATCH = 64
 
 
 async def embed(texts: list[str], *, input_type: str) -> list[list[float]]:
-    """GigaChat embeddings when configured, otherwise Voyage AI.
+    """DeepSeek (when its embedding model is set), else GigaChat, else Voyage AI.
 
     input_type ('document' | 'query') only matters for Voyage.
     """
+    if ai.deepseek_embeddings:
+        return await deepseek.embed(texts)
     if ai.gigachat_configured:
         return await gigachat.embed(texts)
     vectors: list[list[float]] = []

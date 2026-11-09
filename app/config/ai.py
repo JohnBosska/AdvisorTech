@@ -16,8 +16,13 @@ class AIConf(BaseSettings):
     gigachat_auth_url: str = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
     gigachat_api_url: str = "https://gigachat.devices.sberbank.ru/api/v1"
 
-    anthropic_api_key: SecretStr = SecretStr("")
-    model: str = "claude-sonnet-5-5"
+    # DeepSeek (OpenAI-compatible API). Primary LLM when the key is set.
+    # Embeddings through DeepSeek are opt-in: set `deepseek_embedding_model` only after checking
+    # that your account serves /embeddings with `embedding_dim`-sized vectors.
+    deepseek_api_key: SecretStr = SecretStr("")
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-flash"
+    deepseek_embedding_model: str = ""
     max_tokens: int = Field(default=1500, gt=0)
 
     # Vector search (pgvector) is optional: without an embedding key retrieval is full-text only.
@@ -37,12 +42,20 @@ class AIConf(BaseSettings):
         return bool(self.gigachat_credentials.get_secret_value())
 
     @property
+    def deepseek_configured(self) -> bool:
+        return bool(self.deepseek_api_key.get_secret_value())
+
+    @property
+    def deepseek_embeddings(self) -> bool:
+        return self.deepseek_configured and bool(self.deepseek_embedding_model)
+
+    @property
     def provider(self) -> str | None:
-        """GigaChat wins when both are configured."""
+        """DeepSeek wins over GigaChat when both are configured."""
+        if self.deepseek_configured:
+            return "deepseek"
         if self.gigachat_configured:
             return "gigachat"
-        if self.anthropic_api_key.get_secret_value():
-            return "anthropic"
         return None
 
     @property
@@ -51,11 +64,17 @@ class AIConf(BaseSettings):
 
     @property
     def active_model(self) -> str | None:
-        return {"gigachat": self.gigachat_model, "anthropic": self.model}.get(self.provider or "")
+        return {"deepseek": self.deepseek_model, "gigachat": self.gigachat_model}.get(
+            self.provider or ""
+        )
 
     @property
     def vector_configured(self) -> bool:
-        return self.gigachat_configured or bool(self.embedding_api_key.get_secret_value())
+        return (
+            self.deepseek_embeddings
+            or self.gigachat_configured
+            or bool(self.embedding_api_key.get_secret_value())
+        )
 
 
 ai = AIConf()
