@@ -41,7 +41,7 @@ describe('ReportBuilder data sources', () => {
     const tables = vi.spyOn(reportsApi, 'tables').mockResolvedValue([{ name: 'public.sales', label: 'sales', rows: 1200 }])
     const load = vi.spyOn(reportsApi, 'load').mockResolvedValue({ ...dataset, filename: 'sales' })
     render(<ReportBuilder orgId={1} aiReady={false} onClose={() => {}} />)
-    await userEvent.click(screen.getByRole('tab', { name: 'PostgreSQL' }))
+    await userEvent.click(screen.getByRole('tab', { name: 'Postgres' }))
     await userEvent.type(screen.getByLabelText('Хост PostgreSQL'), 'db.example.com')
     await userEvent.type(screen.getByLabelText('База данных'), 'erp')
     await userEvent.type(screen.getByLabelText('Пользователь PostgreSQL'), 'reader')
