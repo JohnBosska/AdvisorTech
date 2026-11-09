@@ -23,6 +23,11 @@ class AIConf(BaseSettings):
     deepseek_base_url: str = "https://api.deepseek.com"
     deepseek_model: str = "deepseek-flash"
     deepseek_embedding_model: str = ""
+    # OpenAI-compatible embeddings gateway (cloud.ru Foundation Models). Highest priority for vectors
+    # when `gateway_embedding_api_key` is set. The model must return `embedding_dim` dimensions.
+    gateway_embedding_api_key: SecretStr = SecretStr("")
+    gateway_embedding_url: str = "https://foundation-models.api.cloud.ru/v1"
+    gateway_embedding_model: str = "ai-sage/Giga-Embeddings-instruct-480M"
     max_tokens: int = Field(default=1500, gt=0)
 
     # Vector search (pgvector) is optional: without an embedding key retrieval is full-text only.
@@ -46,6 +51,10 @@ class AIConf(BaseSettings):
     @property
     def deepseek_configured(self) -> bool:
         return bool(self.deepseek_api_key.get_secret_value())
+
+    @property
+    def gateway_embeddings(self) -> bool:
+        return bool(self.gateway_embedding_api_key.get_secret_value())
 
     @property
     def deepseek_embeddings(self) -> bool:
@@ -73,7 +82,8 @@ class AIConf(BaseSettings):
     @property
     def vector_configured(self) -> bool:
         return (
-            self.deepseek_embeddings
+            self.gateway_embeddings
+            or self.deepseek_embeddings
             or self.gigachat_configured
             or bool(self.embedding_api_key.get_secret_value())
         )

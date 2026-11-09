@@ -5,8 +5,7 @@ import aiohttp
 from app.config.ai import ai
 from app.exceptions import ServiceUnavailableError
 from app.services.llm_types import LLMResult
-
-_EMBED_BATCH = 32
+from app.services.openai_embeddings import embed_openai
 
 
 async def _post(path: str, body: dict) -> dict:
@@ -47,21 +46,9 @@ class DeepSeekLLM:
 
 
 async def embed(texts: list[str]) -> list[list[float]]:
-    vectors: list[list[float]] = []
-    for start in range(0, len(texts), _EMBED_BATCH):
-        payload = await _post(
-            "/embeddings",
-            {"model": ai.deepseek_embedding_model, "input": texts[start : start + _EMBED_BATCH]},
-        )
-        try:
-            ordered = sorted(payload["data"], key=lambda item: item["index"])
-        except (KeyError, TypeError) as exc:
-            raise ServiceUnavailableError("DeepSeek returned unexpected embeddings") from exc
-        for item in ordered:
-            if len(item["embedding"]) != ai.embedding_dim:
-                raise ServiceUnavailableError(
-                    f"DeepSeek embeddings have {len(item['embedding'])} dims, "
-                    f"the index expects {ai.embedding_dim}"
-                )
-            vectors.append(item["embedding"])
-    return vectors
+    return await embed_openai(
+        ai.deepseek_base_url,
+        ai.deepseek_api_key.get_secret_value(),
+        ai.deepseek_embedding_model,
+        texts,
+    )

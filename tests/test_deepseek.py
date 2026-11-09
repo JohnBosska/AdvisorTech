@@ -105,3 +105,57 @@ def test_embeddings_are_opt_in_and_dimension_checked(configured, monkeypatch) ->
             {"/embeddings": wrong_dim},
             monkeypatch,
         )
+
+
+def test_gateway_embeddings_take_priority_and_use_their_own_endpoint(
+    configured, monkeypatch
+) -> None:
+    seen = {}
+    monkeypatch.setattr(ai, "gateway_embedding_api_key", type(ai.deepseek_api_key)("gw-key"))
+    monkeypatch.setattr(ai, "gateway_embedding_model", "ai-sage/Giga-Embeddings-instruct-480M")
+    assert ai.gateway_embeddings and ai.vector_configured
+
+    async def ok(request):
+        seen["auth"] = request.headers["Authorization"]
+        seen["model"] = (await request.json())["model"]
+        return web.json_response({"data": [{"index": 0, "embedding": [0.2] * ai.embedding_dim}]})
+
+    async def main():
+        app = web.Application()
+        app.router.add_post("/v1/embeddings", ok)
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "127.0.0.1", 0)
+        await site.start()
+        port = site._server.sockets[0].getsockname()[1]
+        monkeypatch.setattr(ai, "gateway_embedding_url", f"http://127.0.0.1:{port}/v1")
+        try:
+            return await embeddings.embed(["x"], input_type="query")
+        finally:
+            await runner.cleanup()
+
+    assert len(asyncio.run(main())[0]) == ai.embedding_dim
+    assert seen == {"auth": "Bearer gw-key", "model": "ai-sage/Giga-Embeddings-instruct-480M"}
+
+
+def test_gateway_402_degrades_to_503() -> None:
+    async def run():
+        from app.services.openai_embeddings import embed_openai
+
+        async def pay(request):
+            return web.json_response({"error": "Not enough money"}, status=402)
+
+        app = web.Application()
+        app.router.add_post("/v1/embeddings", pay)
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "127.0.0.1", 0)
+        await site.start()
+        port = site._server.sockets[0].getsockname()[1]
+        try:
+            await embed_openai(f"http://127.0.0.1:{port}/v1", "k", "m", ["x"])
+        finally:
+            await runner.cleanup()
+
+    with pytest.raises(ServiceUnavailableError, match="402"):
+        asyncio.run(run())
