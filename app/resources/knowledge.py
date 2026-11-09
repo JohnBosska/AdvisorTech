@@ -31,6 +31,7 @@ _VECTOR_SQL = text(
       AND d.organization_id = :org
       AND d.is_deleted = false
       AND c.embedding IS NOT NULL
+      AND 1 - (c.embedding <=> CAST(:vec AS vector)) >= :min_similarity
     ORDER BY c.embedding <=> CAST(:vec AS vector)
     LIMIT :limit
     """
@@ -163,6 +164,7 @@ class KnowledgeBase:
                     "org": organization_id,
                     "vec": "[" + ",".join(f"{x:.7f}" for x in vector) + "]",
                     "limit": ai.top_k * 2,
+                    "min_similarity": ai.vector_min_similarity,
                 },
             )
             return [row[0] for row in rows]

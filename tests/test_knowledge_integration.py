@@ -130,6 +130,45 @@ def test_vector_path_uses_pgvector_and_filters_by_organization(monkeypatch) -> N
     run(scenario)
 
 
+def test_vector_search_ignores_weakly_similar_chunks(monkeypatch) -> None:
+    def unit(i: int) -> list[float]:
+        v = [0.0] * ai.embedding_dim
+        v[i] = 1.0
+        return v
+
+    def near(i: int, j: int, weight: float) -> list[float]:  # cosine to unit(i) ~ weight
+        v = unit(i)
+        v[i], v[j] = weight, (1 - weight**2) ** 0.5
+        return v
+
+    async def fake_embed(texts, *, input_type):
+        return [
+            unit(0)
+            if t.startswith("документ")
+            else near(0, 1, 0.05)
+            if "далёкий" in t
+            else near(0, 2, 0.5)
+            for t in texts
+        ]
+
+    monkeypatch.setattr(embeddings, "embed", fake_embed)
+    monkeypatch.setattr(type(ai), "vector_configured", property(lambda self: True))
+
+    async def scenario():
+        owner = await _member()
+        await KnowledgeBase.add(
+            owner, DocumentCreateRequest(title="Doc", content=f"документ {uuid.uuid4().hex}")
+        )
+        assert (
+            await KnowledgeBase.vector_ids(owner.organization_id, "близкий вопрос") != []
+        )  # cos 0.5
+        assert (
+            await KnowledgeBase.vector_ids(owner.organization_id, "далёкий вопрос") == []
+        )  # cos 0.05
+
+    run(scenario)
+
+
 def test_chat_answers_with_sources_and_refuses_without_context(monkeypatch) -> None:
     fake = FakeLLM()
     monkeypatch.setattr(llm_service, "get_llm", lambda: fake)

@@ -35,6 +35,10 @@ class AIConf(BaseSettings):
     embedding_model: str = "voyage-3.5"
     embedding_dim: int = Field(default=1024, gt=0)
 
+    # Cosine similarity (1 - distance) below this is treated as "no match" for vector search.
+    # Measured on cloud.ru Giga-Embeddings: relevant 0.29-0.48, unrelated <= 0.04. Re-tune per provider.
+    vector_min_similarity: float = Field(default=0.15, ge=-1, le=1)
+
     top_k: int = Field(default=6, gt=0, le=20)
     max_question_chars: int = Field(default=2000, gt=0)
     max_document_chars: int = Field(default=200_000, gt=0)
