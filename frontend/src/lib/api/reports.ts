@@ -18,6 +18,7 @@ export const reportsApi = {
   upload: (orgId: number, file: File) => apiUpload<Dataset>(`/api/v1/organizations/${orgId}/reports/dataset?filename=${encodeURIComponent(file.name)}`, file),
   plan: (orgId: number, request: string, columns: DatasetColumn[]) =>
     apiRequest<ReportPlan>(`/api/v1/organizations/${orgId}/reports/plan`, { method: 'POST', body: { request, columns } }),
+  fromUrl: (orgId: number, url: string) => apiRequest<Dataset>(`/api/v1/organizations/${orgId}/reports/sources/url`, { method: 'POST', body: { url } }),
   tables: (orgId: number, source: SourceRequest) => apiRequest<SourceTable[]>(`/api/v1/organizations/${orgId}/reports/sources/tables`, { method: 'POST', body: source }),
   load: (orgId: number, source: SourceRequest, table: string) =>
     apiRequest<Dataset>(`/api/v1/organizations/${orgId}/reports/sources/load`, { method: 'POST', body: { ...source, table } }),

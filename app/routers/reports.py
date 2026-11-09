@@ -12,8 +12,9 @@ from app.schemas.reports import (
     SourceLoadRequest,
     SourceTable,
     SourceTablesRequest,
+    UrlSourceRequest,
 )
-from app.services import bi, bi_sources
+from app.services import bi, bi_sources, bi_url
 
 router = APIRouter(prefix="/organizations/{organization_id}/reports", tags=["BI reports"])
 MemberDep = Annotated[OrganizationMember, Depends(get_organization_member)]
@@ -61,3 +62,10 @@ async def source_load(organization_id: int, payload: SourceLoadRequest, member: 
     if payload.kind == "onec" and payload.onec:
         return await bi_sources.onec_load(payload.onec, payload.table)
     raise BadRequestError("Не указаны параметры подключения")
+
+
+@router.post("/sources/url", response_model=DatasetResponse)
+async def source_url(organization_id: int, payload: UrlSourceRequest, member: MemberDep):
+    """Google Sheets / Yandex Disk public link / direct CSV or XLSX URL."""
+    await _guarded(member)
+    return await bi_url.load_url(payload.url)

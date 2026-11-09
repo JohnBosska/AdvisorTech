@@ -4,6 +4,7 @@ import { ApiError } from '../../../lib/api/client'
 import { reportsApi, type Aggregation, type Dataset, type Widget, type WidgetType } from '../../../lib/api/reports'
 import { toCsv, widgetError } from './aggregate'
 import { SourcePanel } from './SourcePanel'
+import { UrlPanel } from './UrlPanel'
 import { WidgetCard, widgetPoints } from './WidgetCard'
 
 const IDEAS = ['Динамика выручки по месяцам', 'Топ-10 товарных групп по сумме', 'Структура продаж по складам', 'Ключевые показатели: итог, среднее, количество']
@@ -68,7 +69,7 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
   const [panel, setPanel] = useState<'ai' | 'manual'>('ai')
-  const [sourceKind, setSourceKind] = useState<'file' | 'onec' | 'postgres'>('file')
+  const [sourceKind, setSourceKind] = useState<'file' | 'url' | 'onec' | 'postgres'>('file')
   const fileRef = useRef<HTMLInputElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
 
@@ -129,7 +130,7 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
           <section className="glass p-4">
             <p className="flex items-center gap-2 text-[13px] font-medium text-white"><Table2 className="h-4 w-4 text-[#00e599]" aria-hidden />Данные</p>
             <div className="mt-3 flex rounded-xl bg-black/30 p-1 text-[12px]" role="tablist" aria-label="Источник данных">
-              {([['file', 'Файл'], ['onec', '1С'], ['postgres', 'PostgreSQL']] as const).map(([id, label]) => (
+              {([['file', 'Файл'], ['url', 'Ссылка'], ['onec', '1С'], ['postgres', 'Postgres']] as const).map(([id, label]) => (
                 <button key={id} type="button" role="tab" aria-selected={sourceKind === id} onClick={() => setSourceKind(id)} className={`flex-1 rounded-lg py-1.5 transition ${sourceKind === id ? 'bg-white/10 text-white' : 'text-white/50'}`}>{label}</button>
               ))}
             </div>
@@ -148,6 +149,8 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
                   <span className="text-[11px] text-white/40">Выгрузка из 1С, до 5 МБ, первая строка — заголовки</span>
                 </button>
               </>
+            ) : sourceKind === 'url' ? (
+              <UrlPanel orgId={orgId} onLoaded={accept} onError={(e) => setError(explain(e))} />
             ) : (
               <SourcePanel key={sourceKind} orgId={orgId} kind={sourceKind} onLoaded={accept} onError={(e) => setError(explain(e))} />
             )}
@@ -167,7 +170,7 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
               <button type="button" role="tab" aria-selected={panel === 'manual'} onClick={() => setPanel('manual')} className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 transition ${panel === 'manual' ? 'bg-white/10 text-white' : 'text-white/50'}`}><Plus className="h-3.5 w-3.5" aria-hidden />Вручную</button>
             </div>
             <div className="mt-3">
-              {!data && <p className="text-[12px] text-white/45">Сначала выберите данные: файл, объект 1С или таблицу PostgreSQL.</p>}
+              {!data && <p className="text-[12px] text-white/45">Сначала выберите данные: файл, ссылку, объект 1С или таблицу PostgreSQL.</p>}
               {data && panel === 'ai' && (
                 <form onSubmit={(e) => void plan(e)} className="space-y-2.5">
                   {!aiReady && <p className="text-[12px] text-[#e6b85c]">ИИ-модель на сервере не подключена — соберите отчёт вручную.</p>}
@@ -195,7 +198,7 @@ export function ReportBuilder({ orgId, aiReady, onClose }: { orgId: number; aiRe
             <div className="glass flex h-full min-h-[320px] flex-col items-center justify-center gap-3 p-8 text-center">
               <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#00e599]/10 text-[#00e599] shadow-[0_0_40px_-8px_rgb(0_229_153/0.6)]"><Sparkles className="h-6 w-6" aria-hidden /></span>
               <p className="text-[18px] font-medium text-white">Опишите отчёт словами</p>
-              <p className="max-w-[420px] text-[13px] leading-relaxed text-white/50">Подключите 1С или PostgreSQL либо загрузите файл, напишите, что хотите увидеть, и ИИ соберёт дашборд: KPI, графики и таблицы. Виджеты можно удалять и добавлять вручную.</p>
+              <p className="max-w-[420px] text-[13px] leading-relaxed text-white/50">Подключите 1С, PostgreSQL, Google Таблицу по ссылке или загрузите файл, напишите, что хотите увидеть, и ИИ соберёт дашборд: KPI, графики и таблицы. Виджеты можно удалять и добавлять вручную.</p>
             </div>
           ) : data && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">

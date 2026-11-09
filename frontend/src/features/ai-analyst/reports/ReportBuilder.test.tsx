@@ -51,4 +51,14 @@ describe('ReportBuilder data sources', () => {
     await waitFor(() => expect(load).toHaveBeenCalledWith(1, expect.objectContaining({ kind: 'postgres' }), 'public.sales'))
     expect(await screen.findByText(/sales · 3 строк · 2 колонок/)).toBeInTheDocument()
   })
+
+  it('loads a Google Sheet by link', async () => {
+    const fromUrl = vi.spyOn(reportsApi, 'fromUrl').mockResolvedValue({ ...dataset, filename: 'Продажи.csv' })
+    render(<ReportBuilder orgId={1} aiReady={false} onClose={() => {}} />)
+    await userEvent.click(screen.getByRole('tab', { name: 'Ссылка' }))
+    await userEvent.type(screen.getByLabelText('Ссылка на таблицу'), 'https://docs.google.com/spreadsheets/d/abc/edit#gid=0')
+    await userEvent.click(screen.getByRole('button', { name: /Загрузить по ссылке/ }))
+    await waitFor(() => expect(fromUrl).toHaveBeenCalledWith(1, 'https://docs.google.com/spreadsheets/d/abc/edit#gid=0'))
+    expect(await screen.findByText(/Продажи.csv · 3 строк/)).toBeInTheDocument()
+  })
 })

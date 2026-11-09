@@ -79,3 +79,7 @@ class SourceTable(BaseModel):
 
 class SourceLoadRequest(SourceTablesRequest):
     table: str = Field(min_length=1, max_length=300)
+
+
+class UrlSourceRequest(BaseModel):
+    url: str = Field(min_length=10, max_length=2000, pattern=r"^https?://")
