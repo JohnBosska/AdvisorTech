@@ -122,3 +122,16 @@ def test_http_rejects_unsupported_file(monkeypatch) -> None:
     client = _client(monkeypatch)
     r = client.post("/api/v1/organizations/7/reports/dataset?filename=a.pdf", content=b"%PDF-1.4")
     assert r.status_code == 400
+
+
+def test_sanitize_fills_missing_title_and_agg_from_weaker_models() -> None:
+    raw = {
+        "widgets": [
+            {"type": "line", "x": "Месяц", "y": "Выручка"},
+            {"type": "kpi", "y": None, "agg": None},
+        ]
+    }
+    spec, dropped = bi.sanitize_spec(raw, COLUMNS)
+    assert spec.widgets[0].title == "Сумма: Выручка по Месяц" and spec.widgets[0].agg == "sum"
+    assert spec.widgets[1].title == "Количество: строк" and spec.widgets[1].agg == "count"
+    assert dropped == 0
