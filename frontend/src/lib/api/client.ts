@@ -172,3 +172,15 @@ export async function apiBlob(path: string): Promise<Blob> {
   if (!response.ok) return failFrom(response)
   return response.blob()
 }
+
+/** Authenticated raw-body upload (no multipart): the file bytes are the request body. */
+export async function apiUpload<T>(path: string, file: Blob): Promise<T> {
+  let response: Response
+  try {
+    response = await fetch(`${BASE_URL}${path}`, { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/octet-stream', Accept: 'application/json' }), body: file })
+  } catch {
+    throw new ApiError(0, 'network')
+  }
+  if (!response.ok) return failFrom(response)
+  return (await response.json()) as T
+}

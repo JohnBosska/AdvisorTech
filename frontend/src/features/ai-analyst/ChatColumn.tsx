@@ -1,4 +1,4 @@
-import { ChevronDown, Download, FileSpreadsheet, MessageSquarePlus, Send, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Download, FileSpreadsheet, LayoutGrid, MessageSquarePlus, Send, X } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Alert } from '../../components/feedback/Feedback'
 import { aiApi, type AiStatus, type ChatMessage, type Conversation, type Source } from '../../lib/api/ai'
@@ -109,9 +109,10 @@ interface Props {
   inspectedId: number | null
   onInspect: (id: number) => void
   onSend: (text: string) => void
+  onOpenReports: () => void
 }
 
-export function ChatColumn({ orgId, orgName, status, conversations, conversationId, onSelectConversation, messages, live, inspectedId, onInspect, onSend }: Props) {
+export function ChatColumn({ orgId, orgName, status, conversations, conversationId, onSelectConversation, messages, live, inspectedId, onInspect, onSend, onOpenReports }: Props) {
   const [text, setText] = useState('')
   const [menu, setMenu] = useState(false)
   const end = useRef<HTMLDivElement>(null)
@@ -157,6 +158,17 @@ export function ChatColumn({ orgId, orgName, status, conversations, conversation
           </ul>
         )}
       </header>
+
+      <div className="px-4 pt-3">
+        <button type="button" onClick={onOpenReports} className="bi-cta flex w-full items-center gap-3 px-3.5 py-3 text-left">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#00e599]/15 text-[#00e599]"><LayoutGrid className="h-4 w-4" aria-hidden /></span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13.5px] font-medium text-white">Создать отчёт через ИИ</span>
+            <span className="block truncate text-[11.5px] text-white/55">BI-конструктор: таблица из 1С → дашборд по описанию</span>
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
+        </button>
+      </div>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4" aria-live="polite">
         {status && !status.configured && <Alert tone="warning">Модель на сервере не подключена. Документы можно загружать, ответы появятся после настройки ключа.</Alert>}

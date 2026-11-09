@@ -20,6 +20,7 @@ from app.routers.agent import router as agent_router
 from app.routers.auth import router as auth_router
 from app.routers.knowledge import router as knowledge_router
 from app.routers.organizations import router as organizations_router
+from app.routers.reports import router as reports_router
 
 configure_logging()
 
@@ -48,6 +49,7 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(agent_router, prefix="/api/v1")
 app.include_router(organizations_router, prefix="/api/v1")
 app.include_router(knowledge_router, prefix="/api/v1")
+app.include_router(reports_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
