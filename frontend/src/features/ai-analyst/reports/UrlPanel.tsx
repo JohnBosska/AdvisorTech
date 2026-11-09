@@ -5,14 +5,14 @@ import { reportsApi, type Dataset } from '../../../lib/api/reports'
 const field = 'h-9 w-full rounded-xl border border-white/10 bg-white/[0.04] px-2.5 text-[13px] text-white outline-none transition placeholder:text-white/30 focus:border-[#00e599]/60'
 
 /** Google Sheets, Yandex Disk public links and direct CSV/XLSX URLs. */
-export function UrlPanel({ orgId, onLoaded, onError }: { orgId: number; onLoaded: (d: Dataset) => void; onError: (e: unknown) => void }) {
+export function UrlPanel({ orgId, onLoaded, onError }: { orgId: number; onLoaded: (d: Dataset, url: string) => void; onError: (e: unknown) => void }) {
   const [url, setUrl] = useState('')
   const [busy, setBusy] = useState(false)
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     if (!url.trim()) return
     setBusy(true)
-    try { onLoaded(await reportsApi.fromUrl(orgId, url.trim())) } catch (err) { onError(err) } finally { setBusy(false) }
+    try { onLoaded(await reportsApi.fromUrl(orgId, url.trim()), url.trim()) } catch (err) { onError(err) } finally { setBusy(false) }
   }
   return (
     <form onSubmit={(e) => void submit(e)} className="mt-3 space-y-2.5">

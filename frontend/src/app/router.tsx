@@ -18,6 +18,7 @@ const ProductAnalytics = lazyPage(() => import('../features/product-analytics/Pr
 const Inventory = lazyPage(() => import('../features/inventory/InventoryPage'), 'InventoryPage')
 const Logistics = lazyPage(() => import('../features/logistics/LogisticsPage'), 'LogisticsPage')
 const AiAnalyst = lazyPage(() => import('../features/ai-analyst/AiAnalystPage'), 'AiAnalystPage')
+const BiStudioPage = lazyPage(() => import('../features/bi/BiPage'), 'BiPage')
 const FinancialReports = lazyPage(() => import('../features/financial-reports/FinancialReportsPage'), 'FinancialReportsPage')
 const Integrations = lazyPage(() => import('../features/integrations/IntegrationsPage'), 'IntegrationsPage')
 const DataInfra = lazyPage(() => import('../features/data-infrastructure/DataInfrastructurePage'), 'DataInfrastructurePage')
@@ -55,6 +56,7 @@ export const routes = [
           { path: 'inventory', element: page(<Inventory />) },
           { path: 'logistics', element: page(<Logistics />) },
           { path: 'ai-analyst', element: page(<AiAnalyst />) },
+          { path: 'bi', element: page(<BiStudioPage />) },
           { path: 'financial-reports', element: page(<FinancialReports />) },
           { path: 'integrations', element: page(<Integrations />) },
           { path: 'integrations/1c', element: <Navigate to="/app/integrations" replace /> },

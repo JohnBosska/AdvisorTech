@@ -5,7 +5,7 @@ import { reportsApi, type Dataset, type SourceRequest, type SourceTable } from '
 const field = 'h-9 w-full rounded-xl border border-white/10 bg-white/[0.04] px-2.5 text-[13px] text-white outline-none transition placeholder:text-white/30 focus:border-[#00e599]/60'
 
 /** Connects read-only to 1C (OData) or PostgreSQL. Credentials live only in this component's state. */
-export function SourcePanel({ orgId, kind, onLoaded, onError }: { orgId: number; kind: 'onec' | 'postgres'; onLoaded: (d: Dataset) => void; onError: (e: unknown) => void }) {
+export function SourcePanel({ orgId, kind, onLoaded, onError }: { orgId: number; kind: 'onec' | 'postgres'; onLoaded: (d: Dataset, label: string) => void; onError: (e: unknown) => void }) {
   const [onec, setOnec] = useState({ url: '', user: '', password: '' })
   const [pg, setPg] = useState({ host: '', port: 5432, database: '', user: '', password: '', ssl: true })
   const [tables, setTables] = useState<SourceTable[] | null>(null)
@@ -21,7 +21,7 @@ export function SourcePanel({ orgId, kind, onLoaded, onError }: { orgId: number;
   }
   const load = async (t: SourceTable) => {
     setBusy(t.name)
-    try { onLoaded(await reportsApi.load(orgId, source(), t.name)) } catch (err) { onError(err) } finally { setBusy(null) }
+    try { onLoaded(await reportsApi.load(orgId, source(), t.name), kind === 'onec' ? `1С: ${t.label}` : `PostgreSQL ${pg.host}/${pg.database}: ${t.label}`) } catch (err) { onError(err) } finally { setBusy(null) }
   }
 
   const q = filter.trim().toLowerCase()

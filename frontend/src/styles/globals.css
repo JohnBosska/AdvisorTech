@@ -144,3 +144,14 @@ dialog::backdrop { background: rgb(0 0 0 / 72%); backdrop-filter: blur(2px); }
 .bi-cta:hover { border-color: rgb(0 229 153 / 55%); box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%), 0 14px 40px -16px rgb(0 229 153 / 75%); }
 .bi-cta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 9%) 50%, transparent 70%); transform: translateX(-100%); animation: bi-sheen 6s ease-in-out infinite; pointer-events: none; }
 @keyframes bi-sheen { 0%, 70% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+/* ---- BI studio ---- */
+.bi-glass { -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%); box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 18px 40px -26px rgb(0 0 0 / 80%); }
+@media print {
+  @page { size: landscape; margin: 10mm; }
+  body * { visibility: hidden; }
+  .bi-studio, .bi-studio * { visibility: visible; }
+  .bi-studio { position: absolute !important; inset: 0 !important; height: auto !important; overflow: visible !important; }
+  .bi-studio .bi-noprint { display: none !important; }
+  .bi-studio main { overflow: visible !important; }
+}

@@ -1,5 +1,6 @@
 from .base import BaseModel as Base
 from .base import BaseModel as BaseModel
+from .bi import BiReport
 from .integration import AgentCredential, IngestionBatch, SourceConnection, SyncRun
 from .knowledge import ChatConversation, ChatMessage, KnowledgeChunk, KnowledgeDocument
 from .organization import Organization, OrganizationInvitation, OrganizationMember, Subscription
@@ -10,6 +11,7 @@ __all__ = [
     "AgentCredential",
     "Base",
     "BaseModel",
+    "BiReport",
     "ChatConversation",
     "ChatMessage",
     "IngestionBatch",

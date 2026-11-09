@@ -8,7 +8,7 @@ import { ChatColumn } from './ChatColumn'
 import { KnowledgePanel } from './KnowledgePanel'
 import { LeftInfoColumn } from './LeftInfoColumn'
 import { PipelineColumn } from './PipelineColumn'
-import { ReportBuilder } from './reports/ReportBuilder'
+import { BiStudio } from '../bi/BiStudio'
 import { useAskRun } from './useAskRun'
 
 function Workspace({ orgId, orgName, role }: { orgId: number; orgName: string; role: string }) {
@@ -72,7 +72,7 @@ function Workspace({ orgId, orgName, role }: { orgId: number; orgName: string; r
         onSend={(t) => void ask(t)}
         onOpenReports={() => setReportsOpen(true)}
       />
-      {reportsOpen && <ReportBuilder orgId={orgId} aiReady={!!status.data?.configured} onClose={() => setReportsOpen(false)} />}
+      {reportsOpen && <BiStudio orgId={orgId} aiReady={!!status.data?.configured} onClose={() => setReportsOpen(false)} />}
       <Dialog open={knowledgeOpen} onClose={() => setKnowledgeOpen(false)} title="База знаний" description="Документы, по которым отвечает AI-аналитик." wide>
         <KnowledgePanel orgId={orgId} role={role} />
       </Dialog>

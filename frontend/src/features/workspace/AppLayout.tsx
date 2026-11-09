@@ -1,4 +1,4 @@
-import { BarChart3, Bot, Boxes, Cable, CreditCard, Database, FileBarChart, FileSpreadsheet, LayoutDashboard, LogOut, PanelLeftClose, PanelLeftOpen, Settings, Truck } from 'lucide-react'
+import { BarChart3, Bot, Boxes, Cable, CreditCard, Database, FileBarChart, FileSpreadsheet, LayoutDashboard, LogOut, PanelLeftClose, PanelLeftOpen, Settings, Truck, LayoutGrid } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { DemoBadge } from '../../components/feedback/Feedback'
 import { LogoMark, Wordmark } from '../../components/navigation/Wordmark'
@@ -15,6 +15,7 @@ const NAV = [
   { to: '/app/inventory', label: 'Запасы и склады', icon: Boxes },
   { to: '/app/logistics', label: 'Логистика', icon: Truck },
   { to: '/app/ai-analyst', label: 'AI-аналитик', icon: Bot },
+  { to: '/app/bi', label: 'BI-студия', icon: LayoutGrid },
   { to: '/app/financial-reports', label: 'Финансовая отчётность', icon: FileBarChart },
   { to: '/app/integrations', label: 'Интеграции 1С', icon: Cable },
   { to: '/app/data-infrastructure', label: 'Инфраструктура данных', icon: Database },
@@ -27,7 +28,7 @@ export function AppLayout() {
   const { user, signOut } = useAuth()
   const { organization } = useActiveOrganization()
   const { sidebarCollapsed, toggleSidebar } = useUi()
-  const fullBleed = useLocation().pathname.startsWith('/app/ai-analyst')
+  const fullBleed = /^\/app\/(ai-analyst|bi)/.test(useLocation().pathname)
 
   return (
     <div className="flex min-h-screen">

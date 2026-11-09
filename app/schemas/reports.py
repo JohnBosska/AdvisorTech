@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
@@ -83,3 +84,32 @@ class SourceLoadRequest(SourceTablesRequest):
 
 class UrlSourceRequest(BaseModel):
     url: str = Field(min_length=10, max_length=2000, pattern=r"^https?://")
+
+
+class SavedSource(BaseModel):
+    """Provenance of the snapshot. Secrets are rejected, not silently stored."""
+
+    kind: Literal["file", "url", "onec", "postgres", "none"] = "none"
+    label: str = Field(default="", max_length=300)
+    url: str | None = Field(default=None, max_length=2000)
+
+
+class BiReportWrite(BaseModel):
+    title: str = Field(min_length=1, max_length=160)
+    spec: dict
+    dataset: DatasetResponse | None = None
+    source: SavedSource = SavedSource()
+
+
+class BiReportSummary(BaseModel):
+    id: int
+    title: str
+    source: SavedSource
+    created_by: int | None
+    updated_at: datetime
+    model_config = {"from_attributes": True}
+
+
+class BiReportResponse(BiReportSummary):
+    spec: dict
+    dataset: DatasetResponse | None
