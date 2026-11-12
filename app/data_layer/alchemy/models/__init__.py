@@ -1,3 +1,4 @@
+from .audit import AuditEvent
 from .base import BaseModel as Base
 from .base import BaseModel as BaseModel
 from .bi import BiReport
@@ -10,6 +11,7 @@ from .warehouse import RawRecord
 
 __all__ = [
     "AgentCredential",
+    "AuditEvent",
     "Base",
     "BaseModel",
     "BiReport",

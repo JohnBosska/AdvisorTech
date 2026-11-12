@@ -10,7 +10,7 @@ from app.data_layer.alchemy.models import KnowledgeChunk, KnowledgeDocument, Org
 from app.exceptions import BadRequestError, ConflictError, ObjectNotFoundError
 from app.resources.organization import require_role
 from app.schemas.knowledge import AIStatusResponse, DocumentCreateRequest
-from app.services import embeddings
+from app.services import audit, embeddings
 from app.utils.rag import (
     Passage,
     build_or_tsquery,
@@ -127,6 +127,14 @@ class KnowledgeBase:
                     document = await stored.save(session)
             except Exception:  # vectors are an optimisation; full-text search still works
                 logger.exception("vector indexing failed for document %s", document.id)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "knowledge.add",
+            object_type="document",
+            object_id=document.id,
+            details={"title": document.title, "chars": document.char_count},
+        )
         return document
 
     @staticmethod
@@ -141,6 +149,13 @@ class KnowledgeBase:
             )
             if result.rowcount == 0:
                 raise ObjectNotFoundError("Document not found")
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "knowledge.remove",
+            object_type="document",
+            object_id=document_id,
+        )
 
     @staticmethod
     async def fulltext_ids(organization_id: int, question: str) -> list[int]:
