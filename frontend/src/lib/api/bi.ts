@@ -1,7 +1,7 @@
 import { apiRequest } from './client'
 import type { Dataset } from './reports'
 
-export interface SavedSource { kind: 'file' | 'url' | 'onec' | 'postgres' | 'none'; label: string; url?: string | null }
+export interface SavedSource { kind: 'file' | 'url' | 'onec' | 'postgres' | 'warehouse' | 'none'; label: string; url?: string | null; connection_id?: number | null; entity?: string | null }
 export interface BiReportSummary { id: number; title: string; source: SavedSource; created_by: number | null; updated_at: string }
 export interface BiReport<TSpec = unknown> extends BiReportSummary { spec: TSpec; dataset: Dataset | null }
 export interface BiReportWrite<TSpec = unknown> { title: string; spec: TSpec; dataset: Dataset | null; source: SavedSource }

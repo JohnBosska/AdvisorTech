@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.data_layer.alchemy.api_db import SessionFactory
 from app.data_layer.alchemy.models import (
     AgentCredential,
     IngestionBatch,
     OrganizationMember,
+    RawRecord,
     SourceConnection,
     SyncRun,
 )
@@ -107,6 +109,38 @@ class AgentManagement:
             ).save(session)
 
 
+async def _upsert_raw(session, agent: AgentContext, run_id: int, payload: BatchRequest) -> None:
+    """Raw layer: the same key from the same connection replaces the previous payload."""
+    stmt = pg_insert(RawRecord).values(
+        [
+            {
+                "organization_id": agent.organization_id,
+                "connection_id": agent.connection_id,
+                "sync_run_id": run_id,
+                "entity": payload.entity,
+                "record_key": r.key,
+                "payload": r.data,
+                "created_at": _now(),
+                "updated_at": _now(),
+                "is_deleted": False,
+            }
+            for r in payload.records
+        ]
+    )
+    await session.execute(
+        stmt.on_conflict_do_update(
+            constraint="uq_raw_record_key",
+            set_={
+                "payload": stmt.excluded.payload,
+                "sync_run_id": stmt.excluded.sync_run_id,
+                "ingested_at": _now(),
+                "updated_at": _now(),
+                "is_deleted": False,
+            },
+        )
+    )
+
+
 class AgentSync:
     """Agent-facing side. Every query is pinned to the credential's organization and connection."""
 
@@ -198,8 +232,10 @@ class AgentSync:
             await IngestionBatch(
                 organization_id=agent.organization_id,
                 sync_run_id=run.id,
-                **payload.model_dump(),
+                **payload.model_dump(exclude={"records"}),
             ).save(session)
+            if payload.records:
+                await _upsert_raw(session, agent, run.id, payload)
             run.records_received += payload.records_received
             run.records_accepted += payload.records_accepted
             run.records_rejected += payload.records_rejected

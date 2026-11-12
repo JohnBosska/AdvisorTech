@@ -6,6 +6,7 @@ from .knowledge import ChatConversation, ChatMessage, KnowledgeChunk, KnowledgeD
 from .organization import Organization, OrganizationInvitation, OrganizationMember, Subscription
 from .session import RefreshToken
 from .user import User, UserEmail, UserTelegram
+from .warehouse import RawRecord
 
 __all__ = [
     "AgentCredential",
@@ -20,6 +21,7 @@ __all__ = [
     "Organization",
     "OrganizationInvitation",
     "OrganizationMember",
+    "RawRecord",
     "RefreshToken",
     "SourceConnection",
     "Subscription",

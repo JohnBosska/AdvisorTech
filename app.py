@@ -22,6 +22,7 @@ from app.routers.bi_reports import router as bi_reports_router
 from app.routers.knowledge import router as knowledge_router
 from app.routers.organizations import router as organizations_router
 from app.routers.reports import router as reports_router
+from app.routers.warehouse import router as warehouse_router
 
 configure_logging()
 
@@ -52,6 +53,7 @@ app.include_router(organizations_router, prefix="/api/v1")
 app.include_router(knowledge_router, prefix="/api/v1")
 app.include_router(reports_router, prefix="/api/v1")
 app.include_router(bi_reports_router, prefix="/api/v1")
+app.include_router(warehouse_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])

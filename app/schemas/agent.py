@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Any, Self
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -20,6 +20,11 @@ class PendingSyncRun(BaseModel):
     mode: SyncRun.ModeEnum
 
 
+class RawRecordIn(BaseModel):
+    key: str = Field(min_length=1, max_length=200)
+    data: dict[str, Any]
+
+
 class BatchRequest(BaseModel):
     sequence: int = Field(ge=1)
     entity: str = Field(min_length=1, max_length=64)
@@ -28,12 +33,18 @@ class BatchRequest(BaseModel):
     records_accepted: int = Field(ge=0)
     records_rejected: int = Field(default=0, ge=0)
     records_quarantined: int = Field(default=0, ge=0)
+    # The accepted records themselves (raw layer). Optional for agents that only report counts.
+    records: list[RawRecordIn] = Field(default_factory=list, max_length=1000)
 
     @model_validator(mode="after")
     def counters_must_add_up(self) -> Self:
         outcome = self.records_accepted + self.records_rejected + self.records_quarantined
         if outcome != self.records_received:
             raise ValueError("accepted + rejected + quarantined must equal received")
+        if self.records and len(self.records) != self.records_accepted:
+            raise ValueError("records must contain exactly records_accepted items")
+        if len({r.key for r in self.records}) != len(self.records):
+            raise ValueError("record keys must be unique within a batch")
         return self
 
 

@@ -1,4 +1,6 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { fireEvent, render as rtlRender, screen, waitFor, within } from '@testing-library/react'
+import type { ReactElement } from 'react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { biApi } from '../../lib/api/bi'
@@ -15,9 +17,12 @@ const dataset = {
 async function withData() {
   vi.spyOn(reportsApi, 'upload').mockResolvedValue(dataset)
   render(<BiStudio orgId={1} aiReady={false} />)
+  await userEvent.click(screen.getByRole('tab', { name: 'Файл' }))
   fireEvent.change(screen.getByLabelText('Файл с данными'), { target: { files: [new File(['x'], 'sales.csv')] } })
   await screen.findByRole('list', { name: 'Поля данных' })
 }
+
+const render = (ui: ReactElement) => rtlRender(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{ui}</QueryClientProvider>)
 
 afterEach(() => vi.restoreAllMocks())
 
@@ -91,6 +96,19 @@ describe('BiStudio data sources', () => {
     await waitFor(() => expect(load).toHaveBeenCalledWith(1, expect.objectContaining({ kind: 'postgres' }), 'public.sales'))
     expect(await screen.findByText('PostgreSQL db.example.com/erp: sales')).toBeInTheDocument()
     expect(screen.queryByText(/secret/)).not.toBeInTheDocument()
+  })
+})
+
+describe('BiStudio warehouse source', () => {
+  it('lists warehouse entities, loads one and can refresh it without credentials', async () => {
+    vi.spyOn(reportsApi, 'warehouseEntities').mockResolvedValue([{ connection_id: 3, connection_name: 'УТ', entity: 'Document_Sale', records: 2, last_ingested_at: null }])
+    const load = vi.spyOn(reportsApi, 'warehouseLoad').mockResolvedValue(dataset)
+    render(<BiStudio orgId={1} aiReady={false} />)
+    await userEvent.click(await screen.findByRole('button', { name: /Document_Sale/ }))
+    await waitFor(() => expect(load).toHaveBeenCalledWith(1, 3, 'Document_Sale'))
+    expect(await screen.findByText('УТ: Document_Sale')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Обновить данные' }))
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(2))
   })
 })
 

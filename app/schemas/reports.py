@@ -89,7 +89,9 @@ class UrlSourceRequest(BaseModel):
 class SavedSource(BaseModel):
     """Provenance of the snapshot. Secrets are rejected, not silently stored."""
 
-    kind: Literal["file", "url", "onec", "postgres", "none"] = "none"
+    kind: Literal["file", "url", "onec", "postgres", "warehouse", "none"] = "none"
+    connection_id: int | None = None
+    entity: str | None = Field(default=None, max_length=64)
     label: str = Field(default="", max_length=300)
     url: str | None = Field(default=None, max_length=2000)
 
@@ -113,3 +115,11 @@ class BiReportSummary(BaseModel):
 class BiReportResponse(BiReportSummary):
     spec: dict
     dataset: DatasetResponse | None
+
+
+class WarehouseEntity(BaseModel):
+    connection_id: int
+    connection_name: str
+    entity: str
+    records: int
+    last_ingested_at: datetime | None

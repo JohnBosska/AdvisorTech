@@ -3,6 +3,7 @@ import json
 from app.data_layer.alchemy.api_db import SessionFactory
 from app.data_layer.alchemy.models import BiReport, OrganizationMember
 from app.exceptions import BadRequestError, ForbiddenError, ObjectNotFoundError
+from app.resources.warehouse import Warehouse
 from app.schemas.reports import BiReportWrite
 from app.services import bi_url
 
@@ -82,14 +83,18 @@ class BiReports:
 
     @staticmethod
     async def refresh(member: OrganizationMember, report_id: int) -> BiReport:
-        """Re-downloads link-based data. Other sources need credentials, which are never stored."""
+        """Re-reads link or warehouse data. Other sources need credentials, which are never stored."""
         report = await BiReports.get(member, report_id)
-        url = (report.source or {}).get("url")
-        if (report.source or {}).get("kind") != "url" or not url:
+        src = report.source or {}
+        if src.get("kind") == "url" and src.get("url"):
+            dataset = await bi_url.load_url(src["url"])
+        elif src.get("kind") == "warehouse" and src.get("connection_id") and src.get("entity"):
+            dataset = await Warehouse.dataset(member, int(src["connection_id"]), src["entity"])
+        else:
             raise BadRequestError(
-                "Обновить можно только отчёт по ссылке: для 1С и PostgreSQL подключитесь заново"
+                "Обновить можно отчёт по ссылке или из хранилища: "
+                "для 1С и PostgreSQL подключитесь заново"
             )
-        dataset = await bi_url.load_url(url)
         async with SessionFactory.begin() as session:
             stored = await BiReport.get_in_org(session, member.organization_id, report_id)
             _can_edit(member, stored)

@@ -6,6 +6,7 @@ import { reportsApi, type Dataset, type Widget } from '../../lib/api/reports'
 import { toCsv } from '../ai-analyst/reports/aggregate'
 import { SourcePanel } from '../ai-analyst/reports/SourcePanel'
 import { UrlPanel } from '../ai-analyst/reports/UrlPanel'
+import { WarehousePanel } from './WarehousePanel'
 import { Canvas } from './Canvas'
 import { applyFilters, cardValue, categorySeries, columnTypes, pivot, tableRows, visualFilters } from './compute'
 import { FieldsPane } from './FieldsPane'
@@ -75,7 +76,7 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
   const [editing, setEditing] = useState(true)
   const [rightTab, setRightTab] = useState<'fields' | 'format' | 'filters'>('fields')
   const [leftOpen, setLeftOpen] = useState(true)
-  const [sourceKind, setSourceKind] = useState<'file' | 'url' | 'onec' | 'postgres'>('file')
+  const [sourceKind, setSourceKind] = useState<'warehouse' | 'file' | 'url' | 'onec' | 'postgres'>('warehouse')
   const [cross, setCross] = useState<CrossFilter | null>(null)
   const [prompt, setPrompt] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
@@ -166,10 +167,14 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
     } catch (e) { fail(e) } finally { setBusy(null) }
   }
   const refresh = async () => {
-    if (source.kind !== 'url' || !source.url) return
+    const viaLink = source.kind === 'url' && !!source.url
+    const viaWarehouse = source.kind === 'warehouse' && !!source.connection_id && !!source.entity
+    if (!viaLink && !viaWarehouse) return
     setBusy('refresh'); setError('')
     try {
-      const d = reportId && !dirty ? (await biApi.refresh<ReportSpec>(orgId, reportId)).dataset : await reportsApi.fromUrl(orgId, source.url)
+      const d = reportId && !dirty
+        ? (await biApi.refresh<ReportSpec>(orgId, reportId)).dataset
+        : viaLink ? await reportsApi.fromUrl(orgId, source.url!) : await reportsApi.warehouseLoad(orgId, source.connection_id!, source.entity!)
       if (d) { setData(d); setNote(`Данные обновлены: ${d.rows.length.toLocaleString('ru-RU')} строк.`) }
     } catch (e) { fail(e) } finally { setBusy(null) }
   }
@@ -231,7 +236,7 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
             {Object.values(THEMES).map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
           </select>
           <button type="button" onClick={() => { setEditing((x) => !x); setSelectedId(null) }} className="glass-btn ml-1 py-1.5 text-[12px]">{editing ? <><Eye className="h-3.5 w-3.5" aria-hidden />Просмотр</> : <><Pencil className="h-3.5 w-3.5" aria-hidden />Редактировать</>}</button>
-          {source.kind === 'url' && <button type="button" aria-label="Обновить данные по ссылке" title="Обновить данные по ссылке" disabled={busy !== null} onClick={() => void refresh()} className={iconBtn}><RefreshCw className={`h-4 w-4 ${busy === 'refresh' ? 'animate-spin' : ''}`} /></button>}
+          {(source.kind === 'url' || source.kind === 'warehouse') && <button type="button" aria-label="Обновить данные" title={source.kind === 'url' ? 'Обновить данные по ссылке' : 'Обновить данные из хранилища'} disabled={busy !== null} onClick={() => void refresh()} className={iconBtn}><RefreshCw className={`h-4 w-4 ${busy === 'refresh' ? 'animate-spin' : ''}`} /></button>}
           <button type="button" aria-label="Открыть отчёт" title="Открыть" onClick={() => setOpenList(true)} className={iconBtn}><FolderOpen className="h-4 w-4" /></button>
           <button type="button" aria-label="Печать или PDF" title="Печать / PDF" onClick={() => window.print()} className={iconBtn}><Printer className="h-4 w-4" /></button>
           <button type="button" disabled={busy !== null} onClick={() => void save()} className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-full bg-[#00e599] px-3.5 text-[12.5px] font-medium text-black transition hover:brightness-110 disabled:opacity-50"><Save className="h-3.5 w-3.5" aria-hidden />{busy === 'save' ? 'Сохраняю…' : 'Сохранить'}</button>
@@ -250,8 +255,8 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
                   <section className="glass p-3">
                     <p className="flex items-center gap-2 text-[13px] font-medium text-white"><Database className="h-4 w-4 text-[#00e599]" aria-hidden />Данные</p>
                     <div className="mt-2.5 flex rounded-xl bg-black/30 p-1 text-[11.5px]" role="tablist" aria-label="Источник данных">
-                      {([['file', 'Файл'], ['url', 'Ссылка'], ['onec', '1С'], ['postgres', 'Postgres']] as const).map(([id, label]) => (
-                        <button key={id} type="button" role="tab" aria-selected={sourceKind === id} onClick={() => setSourceKind(id)} className={`flex-1 rounded-lg py-1.5 transition ${sourceKind === id ? 'bg-white/10 text-white' : 'text-white/50'}`}>{label}</button>
+                      {([['warehouse', 'Хранилище'], ['file', 'Файл'], ['url', 'Ссылка'], ['onec', '1С'], ['postgres', 'Postgres']] as const).map(([id, label]) => (
+                        <button key={id} type="button" role="tab" aria-selected={sourceKind === id} onClick={() => setSourceKind(id)} className={`flex-1 rounded-lg px-1 py-1.5 transition ${sourceKind === id ? 'bg-white/10 text-white' : 'text-white/50'}`}>{label}</button>
                       ))}
                     </div>
                     {sourceKind === 'file' && (
@@ -264,6 +269,7 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
                         </button>
                       </>
                     )}
+                    {sourceKind === 'warehouse' && <WarehousePanel orgId={orgId} onLoaded={(d, e) => accept(d, { kind: 'warehouse', label: `${e.connection_name}: ${e.entity}`, connection_id: e.connection_id, entity: e.entity })} onError={fail} />}
                     {sourceKind === 'url' && <UrlPanel orgId={orgId} onLoaded={(d, url) => accept(d, { kind: 'url', label: url, url })} onError={fail} />}
                     {(sourceKind === 'onec' || sourceKind === 'postgres') && <SourcePanel key={sourceKind} orgId={orgId} kind={sourceKind} onLoaded={(d, label) => accept(d, { kind: sourceKind, label })} onError={fail} />}
                     {data && (
