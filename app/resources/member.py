@@ -17,6 +17,7 @@ from app.schemas.member import (
     InvitationCreateRequest,
     MemberResponse,
 )
+from app.services import audit
 from app.utils.tokens import generate_opaque_token, hash_opaque_token
 
 Role = OrganizationMember.RoleEnum
@@ -106,6 +107,14 @@ class MemberService:
                 raise ConflictError("An organization must keep at least one owner")
             target.is_deleted = True
             await target.save(session)
+        await audit.record(
+            actor.organization_id,
+            actor.user_id,
+            "member.remove",
+            object_type="member",
+            object_id=member_id,
+            details={"removed_user_id": target.user_id, "role": target.role.value},
+        )
 
     @staticmethod
     async def invite(
@@ -123,6 +132,14 @@ class MemberService:
                 expires_at=datetime.now(timezone.utc)
                 + timedelta(seconds=auth.invitation_ttl_seconds),
             ).save(session)
+        await audit.record(
+            actor.organization_id,
+            actor.user_id,
+            "member.invite",
+            object_type="invitation",
+            object_id=invitation.id,
+            details={"email": invitation.email, "role": invitation.role.value},
+        )
         return InvitationCreatedResponse(
             id=invitation.id,
             email=invitation.email,
@@ -150,6 +167,13 @@ class MemberService:
                 raise ObjectNotFoundError("Invitation not found")
             invitation.is_deleted = True
             await invitation.save(session)
+        await audit.record(
+            actor.organization_id,
+            actor.user_id,
+            "invitation.revoke",
+            object_type="invitation",
+            object_id=invitation_id,
+        )
 
     @staticmethod
     async def accept(user_id: int, token: str) -> int:

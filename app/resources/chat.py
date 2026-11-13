@@ -19,6 +19,7 @@ from app.exceptions import (
 )
 from app.resources.knowledge import KnowledgeBase
 from app.schemas.knowledge import AnswerResponse, MessageResponse
+from app.services import audit
 from app.services import llm as llm_service
 from app.services.llm_types import LLM
 from app.utils.rag import (
@@ -329,6 +330,21 @@ class Chat:
         response = AnswerResponse(
             user_message=MessageResponse.model_validate(user_message),
             assistant_message=MessageResponse.model_validate(assistant_message),
+        )
+        await audit.record(
+            org,
+            member.user_id,
+            "ai.chat",
+            object_type="chat_message",
+            object_id=assistant_message.id,
+            details={
+                "conversation_id": run.conversation_id,
+                "question_chars": len(question),
+                "model": model_name,
+                "sources": len(sources),
+                "refusal": refusal,
+                "duration_ms": duration_ms,
+            },
         )
         yield {"type": "stage", "stage": trace.stages["final_answer"]}
         yield {"type": "done", "answer": response.model_dump(mode="json")}

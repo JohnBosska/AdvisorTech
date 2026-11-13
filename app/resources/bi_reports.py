@@ -5,7 +5,7 @@ from app.data_layer.alchemy.models import BiReport, OrganizationMember
 from app.exceptions import BadRequestError, ForbiddenError, ObjectNotFoundError
 from app.resources.warehouse import Warehouse
 from app.schemas.reports import BiReportWrite
-from app.services import bi_url
+from app.services import audit, bi_url
 
 MAX_SPEC_BYTES = 300_000
 MAX_DATASET_BYTES = 5_000_000
@@ -48,7 +48,7 @@ class BiReports:
     async def create(member: OrganizationMember, payload: BiReportWrite) -> BiReport:
         spec, dataset = _check_sizes(payload)
         async with SessionFactory.begin() as session:
-            return await BiReport(
+            report = await BiReport(
                 organization_id=member.organization_id,
                 created_by=member.user_id,
                 title=payload.title,
@@ -56,6 +56,15 @@ class BiReports:
                 dataset=dataset,
                 source=payload.source.model_dump(),
             ).save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "bi.report.create",
+            object_type="bi_report",
+            object_id=report.id,
+            details={"title": report.title, "source": payload.source.kind},
+        )
+        return report
 
     @staticmethod
     async def update(
@@ -69,7 +78,16 @@ class BiReports:
             _can_edit(member, report)
             report.title, report.spec, report.dataset = payload.title, spec, dataset
             report.source = payload.source.model_dump()
-            return await report.save(session)
+            report = await report.save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "bi.report.update",
+            object_type="bi_report",
+            object_id=report_id,
+            details={"title": payload.title},
+        )
+        return report
 
     @staticmethod
     async def delete(member: OrganizationMember, report_id: int) -> None:
@@ -80,6 +98,13 @@ class BiReports:
             _can_edit(member, report)
             report.is_deleted = True
             await report.save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "bi.report.delete",
+            object_type="bi_report",
+            object_id=report_id,
+        )
 
     @staticmethod
     async def refresh(member: OrganizationMember, report_id: int) -> BiReport:
@@ -99,4 +124,13 @@ class BiReports:
             stored = await BiReport.get_in_org(session, member.organization_id, report_id)
             _can_edit(member, stored)
             stored.dataset = json.loads(json.dumps(dataset, default=lambda o: o.model_dump()))
-            return await stored.save(session)
+            stored = await stored.save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "bi.report.refresh",
+            object_type="bi_report",
+            object_id=report_id,
+            details={"source": src.get("kind"), "rows": len(dataset["rows"])},
+        )
+        return stored

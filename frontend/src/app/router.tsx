@@ -24,6 +24,7 @@ const Integrations = lazyPage(() => import('../features/integrations/Integration
 const DataInfra = lazyPage(() => import('../features/data-infrastructure/DataInfrastructurePage'), 'DataInfrastructurePage')
 const Reports = lazyPage(() => import('../features/reports/ReportsPage'), 'ReportsPage')
 const Subscription = lazyPage(() => import('../features/subscription/SubscriptionPage'), 'SubscriptionPage')
+const Audit = lazyPage(() => import('../features/audit/AuditPage'), 'AuditPage')
 const Settings = lazyPage(() => import('../features/settings/SettingsPage'), 'SettingsPage')
 
 const page = (el: ReactNode) => <Suspense fallback={<LoadingState />}>{el}</Suspense>
@@ -63,6 +64,7 @@ export const routes = [
           { path: 'data-infrastructure', element: page(<DataInfra />) },
           { path: 'reports', element: page(<Reports />) },
           { path: 'subscription', element: page(<Subscription />) },
+          { path: 'audit', element: page(<Audit />) },
           { path: 'settings', element: page(<Settings />) },
         ],
       },

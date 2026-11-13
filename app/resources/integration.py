@@ -3,6 +3,7 @@ from app.data_layer.alchemy.models import OrganizationMember, SourceConnection, 
 from app.exceptions import ObjectNotFoundError
 from app.resources.organization import CONNECTION_MANAGER_ROLES, require_role
 from app.schemas.integration import SourceConnectionCreateRequest
+from app.services import audit
 
 
 class SourceConnectionEntity:
@@ -17,7 +18,16 @@ class SourceConnectionEntity:
             connection = SourceConnection(
                 organization_id=member.organization_id, **payload.model_dump()
             )
-            return await connection.save(session)
+            connection = await connection.save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "connection.create",
+            object_type="connection",
+            object_id=connection.id,
+            details={"name": connection.name, "dbms": payload.source_dbms.value},
+        )
+        return connection
 
     @staticmethod
     async def list(member: OrganizationMember) -> list[SourceConnection]:

@@ -17,6 +17,7 @@ from app.exceptions import ConflictError, ObjectNotFoundError
 from app.resources.organization import CONNECTION_MANAGER_ROLES, require_role
 from app.schemas.agent import BatchRequest, FinishRequest, HeartbeatRequest
 from app.schemas.integration import SyncRunCreateRequest
+from app.services import audit
 from app.utils.tokens import generate_opaque_token
 
 SyncStatus = SyncRun.StatusEnum
@@ -66,6 +67,13 @@ class AgentManagement:
             ).save(session)
             connection.status = ConnStatus.AWAITING_AGENT
             await connection.save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "agent.credential.issue",
+            object_type="connection",
+            object_id=connection_id,
+        )
         return plain
 
     @staticmethod
@@ -79,6 +87,13 @@ class AgentManagement:
                 old.revoked_at = _now()
             connection.status = ConnStatus.REVOKED
             await connection.save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "agent.credential.revoke",
+            object_type="connection",
+            object_id=connection_id,
+        )
 
     @staticmethod
     async def request_sync(
@@ -101,12 +116,21 @@ class AgentManagement:
             ).first()
             if active is not None:
                 raise ConflictError("A synchronization is already queued or running")
-            return await SyncRun(
+            run = await SyncRun(
                 organization_id=member.organization_id,
                 connection_id=connection.id,
                 mode=payload.mode,
                 status=SyncStatus.QUEUED,
             ).save(session)
+        await audit.record(
+            member.organization_id,
+            member.user_id,
+            "sync.request",
+            object_type="sync_run",
+            object_id=run.id,
+            details={"connection_id": connection_id, "mode": payload.mode.value},
+        )
+        return run
 
 
 async def _upsert_raw(session, agent: AgentContext, run_id: int, payload: BatchRequest) -> None:

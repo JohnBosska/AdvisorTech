@@ -14,7 +14,7 @@ from app.schemas.reports import (
     SourceTablesRequest,
     UrlSourceRequest,
 )
-from app.services import bi, bi_sources, bi_url
+from app.services import audit, bi, bi_sources, bi_url
 
 router = APIRouter(prefix="/organizations/{organization_id}/reports", tags=["BI reports"])
 MemberDep = Annotated[OrganizationMember, Depends(get_organization_member)]
@@ -31,12 +31,32 @@ async def upload_dataset(
     if int(request.headers.get("content-length") or 0) > bi.MAX_BYTES:
         raise BadRequestError("Файл больше 5 МБ")
     data = await request.body()
-    return bi.parse_dataset(filename, data)
+    dataset = bi.parse_dataset(filename, data)
+    await audit.record(
+        organization_id,
+        member.user_id,
+        "bi.source.file",
+        details={"filename": filename, "rows": dataset["total_rows"]},
+    )
+    return dataset
 
 
 @router.post("/plan", response_model=ReportPlanResponse)
 async def plan_report(organization_id: int, payload: ReportPlanRequest, member: MemberDep):
-    return await bi.plan_report(payload.request, payload.columns, member.user_id)
+    plan = await bi.plan_report(payload.request, payload.columns, member.user_id)
+    await audit.record(
+        organization_id,
+        member.user_id,
+        "ai.report_plan",
+        details={
+            "request": payload.request,
+            "columns": len(payload.columns),
+            "model": plan["model"],
+            "widgets": len(plan["widgets"]),
+            "dropped": plan["dropped"],
+        },
+    )
+    return plan
 
 
 async def _guarded(member: OrganizationMember):
@@ -48,24 +68,56 @@ async def source_tables(organization_id: int, payload: SourceTablesRequest, memb
     """Connects read-only and lists readable tables (PostgreSQL) or OData objects (1C)."""
     await _guarded(member)
     if payload.kind == "postgres" and payload.postgres:
-        return await bi_sources.pg_tables(payload.postgres)
-    if payload.kind == "onec" and payload.onec:
-        return await bi_sources.onec_tables(payload.onec)
-    raise BadRequestError("Не указаны параметры подключения")
+        tables = await bi_sources.pg_tables(payload.postgres)
+        target = f"{payload.postgres.host}:{payload.postgres.port}/{payload.postgres.database}"
+    elif payload.kind == "onec" and payload.onec:
+        tables = await bi_sources.onec_tables(payload.onec)
+        target = payload.onec.url
+    else:
+        raise BadRequestError("Не указаны параметры подключения")
+    await audit.record(
+        organization_id,
+        member.user_id,
+        "bi.source.tables",
+        details={"kind": payload.kind, "target": target, "tables": len(tables)},
+    )
+    return tables
 
 
 @router.post("/sources/load", response_model=DatasetResponse)
 async def source_load(organization_id: int, payload: SourceLoadRequest, member: MemberDep):
     await _guarded(member)
     if payload.kind == "postgres" and payload.postgres:
-        return await bi_sources.pg_load(payload.postgres, payload.table)
-    if payload.kind == "onec" and payload.onec:
-        return await bi_sources.onec_load(payload.onec, payload.table)
-    raise BadRequestError("Не указаны параметры подключения")
+        dataset = await bi_sources.pg_load(payload.postgres, payload.table)
+        target = f"{payload.postgres.host}:{payload.postgres.port}/{payload.postgres.database}"
+    elif payload.kind == "onec" and payload.onec:
+        dataset = await bi_sources.onec_load(payload.onec, payload.table)
+        target = payload.onec.url
+    else:
+        raise BadRequestError("Не указаны параметры подключения")
+    await audit.record(
+        organization_id,
+        member.user_id,
+        "bi.source.load",
+        details={
+            "kind": payload.kind,
+            "target": target,
+            "table": payload.table,
+            "rows": dataset["total_rows"],
+        },
+    )
+    return dataset
 
 
 @router.post("/sources/url", response_model=DatasetResponse)
 async def source_url(organization_id: int, payload: UrlSourceRequest, member: MemberDep):
     """Google Sheets / Yandex Disk public link / direct CSV or XLSX URL."""
     await _guarded(member)
-    return await bi_url.load_url(payload.url)
+    dataset = await bi_url.load_url(payload.url)
+    await audit.record(
+        organization_id,
+        member.user_id,
+        "bi.source.url",
+        details={"url": payload.url, "rows": dataset["total_rows"]},
+    )
+    return dataset

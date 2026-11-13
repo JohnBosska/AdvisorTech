@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | 1.1 | Мультитенантность, организации, участники, приглашения | VERIFIED | `app/resources/organization.py`, `member.py` | Роли: OWNER, FINANCE, ANALYST, IT_ADMIN |
 | 1.2 | Кастомные роли, права на объекты, RLS, временный доступ | NOT STARTED | — | Фаза 1.2–2 |
-| 1.3 | Аудит действий пользователей и запросов ИИ | NOT STARTED | — | Инкремент 1.2 |
+| 1.3 | Аудит действий пользователей и запросов ИИ | TESTED | `audit_events`, `services/audit.py`, `/app/audit` | Инкремент 1.2 |
 | 2.1 | Агент-API: токены, heartbeat, запуски, идемпотентные батчи | TESTED | `app/routers/agent.py`, `resources/agent.py` | |
 | 2.2 | Хранение записей от агента (сырой слой) | TESTED | `raw_records`, `resources/agent.py`, `resources/warehouse.py` | Инкремент 1.1 |
 | 2.3 | Прямые источники: файл, ссылка, 1С OData, PostgreSQL | VERIFIED | `services/bi.py`, `bi_url.py`, `bi_sources.py` | Без хранения, лимит 5000 строк, SSRF-защита |
@@ -37,7 +37,7 @@
 | 16 | Алерты, рекомендации | NOT STARTED | — | Фаза 5 |
 | 17 | Автоматизация процессов | NOT STARTED | — | Фаза 6 |
 | 18 | Коллаборация, Embedded BI | NOT STARTED | — | Фаза 6 |
-| 19 | Каталоги, lineage, аудит | NOT STARTED | — | Фаза 1.2 / 2 |
+| 19 | Каталоги, lineage, аудит | IN PROGRESS | аудит-лог есть; каталоги и lineage — Фаза 2 | |
 | 20 | Админ-панель, персонализация | NOT STARTED | — | |
 | NFR-S | Тенант-изоляция, RBAC, параметризованные запросы, таймауты, READ ONLY, SSRF, prompt-injection в RAG, лимиты частоты | TESTED | везде | RLS/CLS — NOT STARTED |
 | NFR-P | Мониторинг запросов, нагрузочные тесты, кэш | NOT STARTED | — | |
