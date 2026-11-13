@@ -20,6 +20,7 @@ from app.routers.agent import router as agent_router
 from app.routers.audit import router as audit_router
 from app.routers.auth import router as auth_router
 from app.routers.bi_reports import router as bi_reports_router
+from app.routers.connectors import router as connectors_router
 from app.routers.knowledge import router as knowledge_router
 from app.routers.organizations import router as organizations_router
 from app.routers.reports import router as reports_router
@@ -56,6 +57,7 @@ app.include_router(reports_router, prefix="/api/v1")
 app.include_router(bi_reports_router, prefix="/api/v1")
 app.include_router(warehouse_router, prefix="/api/v1")
 app.include_router(audit_router, prefix="/api/v1")
+app.include_router(connectors_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])

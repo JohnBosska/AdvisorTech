@@ -2,6 +2,7 @@ from .audit import AuditEvent
 from .base import BaseModel as Base
 from .base import BaseModel as BaseModel
 from .bi import BiReport
+from .connector import ConnectorCredential, SyncCursor
 from .integration import AgentCredential, IngestionBatch, SourceConnection, SyncRun
 from .knowledge import ChatConversation, ChatMessage, KnowledgeChunk, KnowledgeDocument
 from .organization import Organization, OrganizationInvitation, OrganizationMember, Subscription
@@ -17,6 +18,7 @@ __all__ = [
     "BiReport",
     "ChatConversation",
     "ChatMessage",
+    "ConnectorCredential",
     "IngestionBatch",
     "KnowledgeChunk",
     "KnowledgeDocument",
@@ -27,6 +29,7 @@ __all__ = [
     "RefreshToken",
     "SourceConnection",
     "Subscription",
+    "SyncCursor",
     "SyncRun",
     "User",
     "UserEmail",

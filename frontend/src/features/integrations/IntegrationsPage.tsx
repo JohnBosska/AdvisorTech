@@ -11,6 +11,7 @@ import { useActiveOrganization, useConnections } from '../../lib/api/hooks'
 import type { ConnectionStatus } from '../../lib/api/organizations'
 import { formatDateTime, formatNumber } from '../../lib/format'
 import { QUALITY_CHECKS, SYNC_ENTITIES, SYNC_HISTORY, type DemoSyncRun } from '../../mocks/data'
+import { ConnectorPanel } from './ConnectorPanel'
 import { ConnectionForm, CONFIG_LABEL, DBMS_LABEL, TRANSPORT_LABEL } from './ConnectionForm'
 
 const STATUS: Record<ConnectionStatus, { label: string; tone: Tone }> = {
@@ -28,6 +29,7 @@ export function IntegrationsPage() {
   const { organization, isPending: orgPending, error: orgError, refetch } = useActiveOrganization()
   const conns = useConnections(organization?.id)
   const [adding, setAdding] = useState(false)
+  const [configuring, setConfiguring] = useState<number | null>(null)
   const [runs, setRuns] = useState<DemoSyncRun[]>(SYNC_HISTORY)
   const [busy, setBusy] = useState(false)
   const canManage = organization?.role === 'OWNER' || organization?.role === 'IT_ADMIN'
@@ -51,7 +53,7 @@ export function IntegrationsPage() {
         {orgPending ? <LoadingState /> : orgError ? <ErrorState message={describeApiError(orgError)} onRetry={() => void refetch()} /> : !organization ? (
           <EmptyState title="Рабочее пространство ещё не создано" text="Создайте компанию в мастере подключения, затем добавьте источник 1С." action={<Link to="/onboarding" className="text-sm text-accent hover:underline">Открыть мастер</Link>} />
         ) : conns.isPending ? <LoadingState /> : conns.error ? <ErrorState message={describeApiError(conns.error)} onRetry={() => void conns.refetch()} /> : conns.data.length === 0 ? (
-          <EmptyState title="Подключений пока нет" text="Добавьте информационную базу 1С. Сейчас подключение создаётся как черновик — загрузка данных появится вместе с Connector Agent." action={canManage ? <Button size="sm" onClick={() => setAdding(true)}>Добавить подключение</Button> : <p className="text-xs text-muted">Подключения добавляют владелец и IT-администратор.</p>} />
+          <EmptyState title="Подключений пока нет" text="Добавьте информационную базу 1С. После создания настройте загрузку: серверный коннектор (1С OData или PostgreSQL) или Connector Agent." action={canManage ? <Button size="sm" onClick={() => setAdding(true)}>Добавить подключение</Button> : <p className="text-xs text-muted">Подключения добавляют владелец и IT-администратор.</p>} />
         ) : (
           <ul className="grid gap-4 md:grid-cols-2">
             {conns.data.map((c) => (
@@ -64,7 +66,7 @@ export function IntegrationsPage() {
                   <dt className="text-muted">Подключение</dt><dd>{TRANSPORT_LABEL[c.transport]}</dd>
                   <dt className="text-muted">Последняя синхронизация</dt><dd>{c.last_successful_sync_at ? formatDateTime(c.last_successful_sync_at) : 'не выполнялась'}</dd>
                 </dl>
-                <p className="mt-4 text-xs text-muted">Режим: только чтение. Синхронизации появятся после реализации Connector Agent.</p>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-muted">Только чтение. {c.connector_kind ? `Серверный коннектор: ${c.connector_kind === 'onec_odata' ? '1С OData' : 'PostgreSQL'}${c.schedule_minutes ? `, каждые ${c.schedule_minutes} мин` : ''}.` : 'Данные загружает серверный коннектор или Connector Agent.'}</p><Button size="sm" variant="secondary" onClick={() => setConfiguring(c.id)}>Загрузка данных</Button></div>
               </li>
             ))}
           </ul>
@@ -113,6 +115,9 @@ export function IntegrationsPage() {
         </div>
       </section>
 
+      <Dialog open={configuring !== null} onClose={() => setConfiguring(null)} title="Загрузка данных" description="Серверный коннектор: только чтение, загрузка в сырой слой хранилища." wide>
+        {organization && conns.data?.find((c) => c.id === configuring) && <ConnectorPanel orgId={organization.id} conn={conns.data.find((c) => c.id === configuring)!} canManage={canManage} />}
+      </Dialog>
       <Dialog open={adding} onClose={() => setAdding(false)} title="Новое подключение 1С" description="Источник только для чтения." wide>
         {organization && <ConnectionForm organizationId={organization.id} onDone={() => setAdding(false)} />}
       </Dialog>

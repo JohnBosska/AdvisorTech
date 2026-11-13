@@ -61,6 +61,11 @@ class SourceConnection(BaseModel):
         default=StatusEnum.DRAFT,
     )
     enabled_entities: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default="[]")
+    # server-side connector (None = Connector Agent delivers data): 'postgres' | 'onec_odata'
+    connector_kind: Mapped[str | None] = mapped_column(String(32))
+    # per entity: {"key": column, "cursor": column | None}
+    entity_config: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    schedule_minutes: Mapped[int | None] = mapped_column()
     last_successful_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     @classmethod

@@ -37,7 +37,7 @@ export function ConnectionForm({ organizationId, onDone }: { organizationId: num
         <SelectField label="Конфигурация 1С" {...form.register('configuration')}>{Object.entries(CONFIG_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</SelectField>
         <Field label="Версия конфигурации" placeholder="например, 11.5.18" error={e.configuration_version?.message} {...form.register('configuration_version')} />
         <SelectField label="СУБД информационной базы" {...form.register('source_dbms')}>{Object.entries(DBMS_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</SelectField>
-        <SelectField label="Способ подключения" hint="Прямые SQL-запросы к таблицам 1С не используются." {...form.register('transport')}>{Object.entries(TRANSPORT_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</SelectField>
+        <SelectField label="Способ подключения" hint="Для серверной загрузки рекомендуется OData: он отдаёт данные в терминах 1С." {...form.register('transport')}>{Object.entries(TRANSPORT_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</SelectField>
       </div>
       <p className="text-xs text-muted">Подключение создаётся как <b>черновик</b> и работает только на чтение. Connector Agent и обмен данными ещё не реализованы — данные из 1С не загружаются.</p>
       {create.isError && <Alert>{describeApiError(create.error)}</Alert>}

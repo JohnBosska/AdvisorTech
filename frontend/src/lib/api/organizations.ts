@@ -31,6 +31,9 @@ export interface SourceConnection {
   transport: 'ODATA' | 'HTTP_SERVICE' | 'EXTENSION' | 'FILE_EXCHANGE'
   status: ConnectionStatus
   enabled_entities: string[]
+  connector_kind?: 'postgres' | 'onec_odata' | null
+  entity_config?: Record<string, { key: string; cursor: string | null }>
+  schedule_minutes?: number | null
   last_successful_sync_at: string | null
   read_only: boolean
 }

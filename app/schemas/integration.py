@@ -24,6 +24,9 @@ class SourceConnectionResponse(BaseModel):
     transport: SourceConnection.TransportEnum
     status: SourceConnection.StatusEnum
     enabled_entities: list[str]
+    connector_kind: str | None = None
+    entity_config: dict = {}
+    schedule_minutes: int | None = None
     last_successful_sync_at: datetime | None
     read_only: bool = True
 

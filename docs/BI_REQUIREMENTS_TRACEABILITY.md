@@ -10,9 +10,11 @@
 | 2.1 | Агент-API: токены, heartbeat, запуски, идемпотентные батчи | TESTED | `app/routers/agent.py`, `resources/agent.py` | |
 | 2.2 | Хранение записей от агента (сырой слой) | TESTED | `raw_records`, `resources/agent.py`, `resources/warehouse.py` | Инкремент 1.1 |
 | 2.3 | Прямые источники: файл, ссылка, 1С OData, PostgreSQL | VERIFIED | `services/bi.py`, `bi_url.py`, `bi_sources.py` | Без хранения, лимит 5000 строк, SSRF-защита |
-| 2.4 | MS SQL, MySQL, Oracle, JSON/XML/Parquet, REST/SOAP, ClickHouse… | NOT STARTED | — | Фаза 1.3 |
+| 2.4a | Серверные коннекторы: PostgreSQL и 1С OData, обнаружение схемы, инкремент по курсору, расписание (Temporal), зашифрованные учётные данные | VERIFIED | `app/connectors/`, `resources/connectors.py` | Проверено с реальным Temporal локально |
+| 2.4b | MS SQL, MySQL, Oracle, JSON/XML/Parquet, REST/SOAP, ClickHouse… | NOT STARTED | — | Добавляются реализацией интерфейса `Connector` |
 | 2.5 | Connector Agent для 1С в закрытой сети | NOT STARTED | — | Фаза 1.4 |
-| 3 | ETL/ELT, визуальный конструктор | NOT STARTED | — | Фаза 1.3/2 |
+| 3a | Загрузка: полная и инкрементальная, расписание, история запусков, ошибки | TESTED | `SyncRun`, `sync_cursors`, workflow `connector-sync` | |
+| 3b | Трансформации, визуальный ETL-конструктор, CDC | NOT STARTED | — | Фаза 2 |
 | 4.1 | Raw-слой | TESTED | миграция `0008_raw_records` | |
 | 4.2 | Staging / core / marts, факты и измерения | NOT STARTED | — | Фаза 2–3 |
 | 5 | Семантическая модель, меры, KPI-каталог, движок формул | NOT STARTED | — | Фаза 2 |
