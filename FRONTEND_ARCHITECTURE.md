@@ -127,9 +127,6 @@ Recommended route map:
 
 /app                           Authenticated application shell
 /app/dashboard                 Business overview
-/app/analytics/products        Product group analytics
-/app/inventory                 Inventory and warehouses
-/app/logistics                 Logistics analytics
 /app/ai-analyst                AI analyst workspace
 /app/financial-reports         Owner-oriented financial reports
 /app/integrations              Integration overview

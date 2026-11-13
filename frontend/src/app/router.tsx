@@ -14,9 +14,6 @@ const lazyPage = <T extends Record<string, React.ComponentType>>(load: () => Pro
 
 const Onboarding = lazyPage(() => import('../features/onboarding/OnboardingPage'), 'OnboardingPage')
 const Dashboard = lazyPage(() => import('../features/dashboard/DashboardPage'), 'DashboardPage')
-const ProductAnalytics = lazyPage(() => import('../features/product-analytics/ProductAnalyticsPage'), 'ProductAnalyticsPage')
-const Inventory = lazyPage(() => import('../features/inventory/InventoryPage'), 'InventoryPage')
-const Logistics = lazyPage(() => import('../features/logistics/LogisticsPage'), 'LogisticsPage')
 const AiAnalyst = lazyPage(() => import('../features/ai-analyst/AiAnalystPage'), 'AiAnalystPage')
 const BiStudioPage = lazyPage(() => import('../features/bi/BiPage'), 'BiPage')
 const FinancialReports = lazyPage(() => import('../features/financial-reports/FinancialReportsPage'), 'FinancialReportsPage')
@@ -53,9 +50,6 @@ export const routes = [
         element: <AppLayout />,
         children: [
           { index: true, element: page(<Dashboard />) },
-          { path: 'analytics/products', element: page(<ProductAnalytics />) },
-          { path: 'inventory', element: page(<Inventory />) },
-          { path: 'logistics', element: page(<Logistics />) },
           { path: 'ai-analyst', element: page(<AiAnalyst />) },
           { path: 'bi', element: page(<BiStudioPage />) },
           { path: 'financial-reports', element: page(<FinancialReports />) },
