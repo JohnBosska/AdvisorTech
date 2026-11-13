@@ -1,17 +1,26 @@
+/* Design tokens. Dark is the default; [data-theme="light"] on <html> overrides the same names, so every
+   token-based utility (bg-surface-1, text-fg/60, border-border …) follows the app theme automatically.
+   Never hardcode white/black or hex colours in app components: use these tokens. */
 @theme {
-  --color-bg: #000000;
-  --color-surface-1: #0b0d0c;
-  --color-surface-2: #121413;
-  --color-surface-3: #18191b;
-  --color-border: #26292d;
-  --color-border-strong: #3a3e44;
-  --color-text-soft: #e4f1eb;
-  --color-muted: #94979e;
-  --color-accent: #34d59a;
-  --color-accent-strong: #5be3b2;
+  --color-bg: #080d0c;
+  --color-surface-1: #101917;
+  --color-surface-2: #111c19;
+  --color-surface-3: #172421;
+  --color-border: #24332f;
+  --color-border-strong: #35473f;
+  --color-fg: #f0f5f3;
+  --color-text-soft: #dbe5e1;
+  --color-muted: #9aa9a3;
+  --color-accent: #00d3a0;
+  --color-accent-strong: #2be2b3;
+  --color-accent-ink: #00d3a0;      /* accent used as TEXT colour (contrast-safe per theme) */
+  --color-accent-contrast: #03120d; /* text on accent fills */
+  --color-hover: #15231f;
+  --color-knob: #ffffff;             /* switch thumbs and other always-white marks */
+  --color-overlay: rgb(0 0 0 / 0.6);
   --color-mint: #a5f3d2;
   --color-cyan: #62ddeb;
-  --color-blue: #557eea;
+  --color-blue: #5b8def;
   --color-violet: #8a74d6;
   --color-link: #39a57d;
   --color-warning: #e6b85c;
@@ -33,4 +42,29 @@
   color-scheme: dark;
   --gradient-hero: linear-gradient(125deg, #34d59a 0%, #62ddeb 34%, #557eea 66%, #8a74d6 100%);
   --gradient-glow: radial-gradient(circle at 50% 50%, rgb(52 213 154 / 20%), rgb(98 221 235 / 9%) 38%, transparent 72%);
+}
+
+/* Light app theme (workspace and BI studio; the landing keeps its own dark design). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #f4f6f8;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f8fafb;
+  --color-surface-3: #eef2f4;
+  --color-border: #e3e8ec;
+  --color-border-strong: #cbd3d9;
+  --color-fg: #18212f;
+  --color-text-soft: #2c3645;
+  --color-muted: #667085;
+  --color-accent: #00c997;
+  --color-accent-strong: #00b98a;
+  --color-accent-ink: #007a5b;      /* #00C997 on white is ~2:1, too low for text */
+  --color-accent-contrast: #04281e;  /* dark text on #00C997: white would be ~2:1 */
+  --color-hover: #e7f8f2;
+  --color-overlay: rgb(16 24 32 / 0.35);
+  --color-blue: #3f6fd8;
+  --color-violet: #7c5cd6;
+  --color-link: #00805f;
+  --color-warning: #b7791f;         /* #D99A2B kept for fills; text needs more contrast */
+  --color-danger: #dc5252;
 }

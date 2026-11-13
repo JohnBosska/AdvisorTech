@@ -10,7 +10,7 @@ export function Tabs<T extends string>({ tabs, value, onChange, label }: TabsPro
           type="button"
           aria-selected={value === t.id}
           onClick={() => onChange(t.id)}
-          className={`rounded-[var(--radius-sm)] px-3 py-1.5 text-[13px] transition-colors ${value === t.id ? 'bg-surface-3 text-accent' : 'text-muted hover:text-white'}`}
+          className={`rounded-[var(--radius-sm)] px-3 py-1.5 text-[13px] transition-colors ${value === t.id ? 'bg-surface-3 text-accent-ink' : 'text-muted hover:text-fg'}`}
         >
           {t.label}
         </button>

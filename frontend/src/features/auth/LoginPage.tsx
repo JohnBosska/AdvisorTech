@@ -29,7 +29,7 @@ export function LoginPage() {
   if (isAuthenticated) return <Navigate to="/app" replace />
 
   return (
-    <AuthLayout title="Вход" subtitle="Войдите, чтобы открыть рабочее пространство." footer={<>Нет аккаунта? <Link to="/register" className="text-accent hover:underline">Зарегистрироваться</Link></>}>
+    <AuthLayout title="Вход" subtitle="Войдите, чтобы открыть рабочее пространство." footer={<>Нет аккаунта? <Link to="/register" className="text-accent-ink hover:underline">Зарегистрироваться</Link></>}>
       <form className="flex flex-col gap-4" noValidate onSubmit={form.handleSubmit((v) => login.mutate(v))}>
         <Field label="Email" type="email" autoComplete="email" error={form.formState.errors.email?.message} {...form.register('email')} />
         <Field label="Пароль" type="password" autoComplete="current-password" error={form.formState.errors.password?.message} {...form.register('password')} />

@@ -23,7 +23,7 @@ const STATUS: Record<ConnectionStatus, { label: string; tone: Tone }> = {
 }
 const MODE: Record<DemoSyncRun['mode'], string> = { FULL: 'Полная', INCREMENTAL: 'Инкрементальная', RECONCILIATION: 'Сверка', RECOVERY: 'Восстановление' }
 const RUN: Record<DemoSyncRun['status'], { label: string; tone: Tone }> = { SUCCEEDED: { label: 'Успешно', tone: 'success' }, FAILED: { label: 'Ошибка', tone: 'danger' }, RUNNING: { label: 'Выполняется', tone: 'info' } }
-const ENTITY = { supported: { label: 'Поддерживается', icon: CheckCircle2, cls: 'text-accent' }, partial: { label: 'Частично', icon: MinusCircle, cls: 'text-warning' }, unsupported: { label: 'Недоступно в этой конфигурации', icon: CircleSlash, cls: 'text-muted' } } as const
+const ENTITY = { supported: { label: 'Поддерживается', icon: CheckCircle2, cls: 'text-accent-ink' }, partial: { label: 'Частично', icon: MinusCircle, cls: 'text-warning' }, unsupported: { label: 'Недоступно в этой конфигурации', icon: CircleSlash, cls: 'text-muted' } } as const
 
 export function IntegrationsPage() {
   const { organization, isPending: orgPending, error: orgError, refetch } = useActiveOrganization()
@@ -51,7 +51,7 @@ export function IntegrationsPage() {
       <section aria-labelledby="real" className="space-y-4">
         <h2 id="real" className="text-lg font-medium">Ваши подключения</h2>
         {orgPending ? <LoadingState /> : orgError ? <ErrorState message={describeApiError(orgError)} onRetry={() => void refetch()} /> : !organization ? (
-          <EmptyState title="Рабочее пространство ещё не создано" text="Создайте компанию в мастере подключения, затем добавьте источник 1С." action={<Link to="/onboarding" className="text-sm text-accent hover:underline">Открыть мастер</Link>} />
+          <EmptyState title="Рабочее пространство ещё не создано" text="Создайте компанию в мастере подключения, затем добавьте источник 1С." action={<Link to="/onboarding" className="text-sm text-accent-ink hover:underline">Открыть мастер</Link>} />
         ) : conns.isPending ? <LoadingState /> : conns.error ? <ErrorState message={describeApiError(conns.error)} onRetry={() => void conns.refetch()} /> : conns.data.length === 0 ? (
           <EmptyState title="Подключений пока нет" text="Добавьте информационную базу 1С. После создания настройте загрузку: серверный коннектор (1С OData или PostgreSQL) или Connector Agent." action={canManage ? <Button size="sm" onClick={() => setAdding(true)}>Добавить подключение</Button> : <p className="text-xs text-muted">Подключения добавляют владелец и IT-администратор.</p>} />
         ) : (
@@ -87,13 +87,13 @@ export function IntegrationsPage() {
             </div>
             <div className="mt-5 overflow-x-auto rounded-[var(--radius-md)] border border-border">
               <table className="w-full min-w-[640px] text-sm"><caption className="sr-only">История синхронизаций (демо)</caption>
-                <thead className="bg-black text-xs text-muted"><tr><th className="px-3 py-2 text-left font-medium">Запуск</th><th className="px-3 py-2 text-left font-medium">Режим</th><th className="px-3 py-2 text-left font-medium">Статус</th><th className="px-3 py-2 text-right font-medium">Получено</th><th className="px-3 py-2 text-right font-medium">Принято</th><th className="px-3 py-2 text-right font-medium">Отклонено</th><th className="px-3 py-2 text-right font-medium">Карантин</th></tr></thead>
+                <thead className="bg-bg text-xs text-muted"><tr><th className="px-3 py-2 text-left font-medium">Запуск</th><th className="px-3 py-2 text-left font-medium">Режим</th><th className="px-3 py-2 text-left font-medium">Статус</th><th className="px-3 py-2 text-right font-medium">Получено</th><th className="px-3 py-2 text-right font-medium">Принято</th><th className="px-3 py-2 text-right font-medium">Отклонено</th><th className="px-3 py-2 text-right font-medium">Карантин</th></tr></thead>
                 <tbody>
                   {runs.map((r) => (
                     <tr key={r.id} className="border-t border-border align-top">
                       <td className="px-3 py-2 text-muted">{formatDateTime(r.startedAt)}</td>
                       <td className="px-3 py-2">{MODE[r.mode]}</td>
-                      <td className="px-3 py-2"><Badge tone={RUN[r.status].tone}>{RUN[r.status].label}</Badge>{r.note && <p className="mt-1 max-w-xs text-xs text-muted">{r.note}</p>}{r.status === 'FAILED' && <button type="button" onClick={demoSync} disabled={busy} className="mt-1 text-xs text-accent hover:underline disabled:opacity-50">Повторить (демо)</button>}</td>
+                      <td className="px-3 py-2"><Badge tone={RUN[r.status].tone}>{RUN[r.status].label}</Badge>{r.note && <p className="mt-1 max-w-xs text-xs text-muted">{r.note}</p>}{r.status === 'FAILED' && <button type="button" onClick={demoSync} disabled={busy} className="mt-1 text-xs text-accent-ink hover:underline disabled:opacity-50">Повторить (демо)</button>}</td>
                       <td className="tabular px-3 py-2 text-right">{formatNumber(r.received)}</td><td className="tabular px-3 py-2 text-right">{formatNumber(r.accepted)}</td><td className="tabular px-3 py-2 text-right">{formatNumber(r.rejected)}</td><td className="tabular px-3 py-2 text-right">{formatNumber(r.quarantined)}</td>
                     </tr>
                   ))}

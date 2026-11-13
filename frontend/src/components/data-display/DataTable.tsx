@@ -61,9 +61,9 @@ export function DataTable<T>({ data, columns, caption, searchPlaceholder = 'По
                   return (
                     <th key={h.id} scope="col" aria-sort={sorted ? (sorted === 'asc' ? 'ascending' : 'descending') : 'none'} className={`px-4 py-3 font-medium ${numeric ? 'text-right' : 'text-left'}`}>
                       {h.column.getCanSort() ? (
-                        <button type="button" onClick={h.column.getToggleSortingHandler()} className={`inline-flex items-center gap-1 hover:text-white ${numeric ? 'flex-row-reverse' : ''}`}>
+                        <button type="button" onClick={h.column.getToggleSortingHandler()} className={`inline-flex items-center gap-1 hover:text-fg ${numeric ? 'flex-row-reverse' : ''}`}>
                           {flexRender(h.column.columnDef.header, h.getContext())}
-                          {sorted === 'asc' ? <ArrowUp className="h-3 w-3 text-accent" /> : sorted === 'desc' ? <ArrowDown className="h-3 w-3 text-accent" /> : null}
+                          {sorted === 'asc' ? <ArrowUp className="h-3 w-3 text-accent-ink" /> : sorted === 'desc' ? <ArrowDown className="h-3 w-3 text-accent-ink" /> : null}
                         </button>
                       ) : flexRender(h.column.columnDef.header, h.getContext())}
                     </th>

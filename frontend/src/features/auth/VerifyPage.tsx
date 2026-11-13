@@ -46,7 +46,7 @@ export function VerifyPage() {
   }
 
   return (
-    <AuthLayout title="Подтвердите email" subtitle="Введите 8-значный код из письма. Он действует 10 минут, попыток — 5." footer={<Link to="/login" className="text-accent hover:underline">Вернуться ко входу</Link>}>
+    <AuthLayout title="Подтвердите email" subtitle="Введите 8-значный код из письма. Он действует 10 минут, попыток — 5." footer={<Link to="/login" className="text-accent-ink hover:underline">Вернуться ко входу</Link>}>
       <form className="flex flex-col gap-4" noValidate onSubmit={form.handleSubmit((v) => verify.mutate(v))}>
         <Field label="Email" type="email" autoComplete="email" error={form.formState.errors.email?.message} {...form.register('email')} />
         <Field label="Пароль" type="password" autoComplete="current-password" error={form.formState.errors.password?.message} {...form.register('password')} />

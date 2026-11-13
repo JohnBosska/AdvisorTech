@@ -122,9 +122,9 @@ export function ConnectorPanel({ orgId, conn, canManage }: { orgId: number; conn
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-border bg-black px-3 py-2.5 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-border bg-bg px-3 py-2.5 text-sm">
         <span><span className="text-muted">{kind === 'onec_odata' ? '1С OData' : 'PostgreSQL'}:</span> <span className="font-mono text-[13px]">{status.data.target}</span></span>
-        {canManage && <button type="button" onClick={() => setEditCreds(true)} className="text-xs text-accent hover:underline">Изменить учётные данные</button>}
+        {canManage && <button type="button" onClick={() => setEditCreds(true)} className="text-xs text-accent-ink hover:underline">Изменить учётные данные</button>}
       </div>
 
       <section className="space-y-3">
@@ -169,7 +169,7 @@ export function ConnectorPanel({ orgId, conn, canManage }: { orgId: number; conn
         {runs.data && runs.data.length > 0 ? (
           <div className="overflow-x-auto rounded-[var(--radius-md)] border border-border">
             <table className="w-full min-w-[560px] text-sm">
-              <thead className="bg-black text-xs text-muted"><tr><th className="px-3 py-2 text-left font-medium">Запуск</th><th className="px-3 py-2 text-left font-medium">Режим</th><th className="px-3 py-2 text-left font-medium">Статус</th><th className="px-3 py-2 text-right font-medium">Получено</th><th className="px-3 py-2 text-right font-medium">Принято</th></tr></thead>
+              <thead className="bg-bg text-xs text-muted"><tr><th className="px-3 py-2 text-left font-medium">Запуск</th><th className="px-3 py-2 text-left font-medium">Режим</th><th className="px-3 py-2 text-left font-medium">Статус</th><th className="px-3 py-2 text-right font-medium">Получено</th><th className="px-3 py-2 text-right font-medium">Принято</th></tr></thead>
               <tbody>
                 {runs.data.map((r) => (
                   <tr key={r.id} className="border-t border-border align-top">

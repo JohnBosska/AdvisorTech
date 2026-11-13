@@ -41,7 +41,7 @@ export function SubscriptionPage() {
           <div><p className="eyebrow">Тариф</p><h2 className="mt-2 text-2xl font-semibold">Premium</h2></div>
           <div className="flex items-center gap-3"><span className="text-sm text-muted">Статус:</span><Badge tone={st.tone}>{st.label}</Badge></div>
         </div>
-        <ul className="mt-6 grid gap-2 sm:grid-cols-2">{FEATURES.map((f) => <li key={f} className="flex items-start gap-2 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />{f}</li>)}</ul>
+        <ul className="mt-6 grid gap-2 sm:grid-cols-2">{FEATURES.map((f) => <li key={f} className="flex items-start gap-2 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-ink" aria-hidden />{f}</li>)}</ul>
         <div className="mt-6 flex flex-wrap gap-3"><Button onClick={() => { setSent(false); setOpen(true) }}>Запросить подключение</Button></div>
       </section>
       <section className="rounded-[var(--radius-lg)] border border-border p-6">

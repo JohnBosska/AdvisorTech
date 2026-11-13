@@ -11,10 +11,10 @@ const SUGGESTED = ['Какая у нас политика скидок?', 'Ка�
 
 function SourceDetails({ source, onClose }: { source: Source; onClose: () => void }) {
   return (
-    <div role="dialog" aria-label={`Источник ${source.ref}`} className="mt-2 rounded-[var(--radius-md)] border border-border-strong bg-black p-3 text-xs">
+    <div role="dialog" aria-label={`Источник ${source.ref}`} className="mt-2 rounded-[var(--radius-md)] border border-border-strong bg-bg p-3 text-xs">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-medium text-text-soft"><span className="font-mono text-accent">[{source.ref}]</span> {source.title}</p>
-        <button type="button" aria-label="Закрыть источник" onClick={onClose} className="text-muted hover:text-white"><X className="h-3.5 w-3.5" /></button>
+        <p className="font-medium text-text-soft"><span className="font-mono text-accent-ink">[{source.ref}]</span> {source.title}</p>
+        <button type="button" aria-label="Закрыть источник" onClick={onClose} className="text-muted hover:text-fg"><X className="h-3.5 w-3.5" /></button>
       </div>
       <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-[11px] text-muted">
         <dt>Тип</dt><dd className="text-text-soft">Документ базы знаний</dd>
@@ -55,12 +55,12 @@ function Answer({ m, orgId, conversationId, inspecting, onInspect }: { m: ChatMe
     <article className={`space-y-3 rounded-[var(--radius-lg)] border bg-surface-1 p-4 ${m.refusal ? 'border-warning/30' : inspecting ? 'border-accent/40' : 'border-border'}`} data-testid="answer">
       <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-text-soft">
         {splitCitations(m.content).map((part, i) =>
-          'text' in part ? <span key={i}>{splitBold(part.text).map((b, j) => b.bold ? <strong key={j} className="font-medium text-white">{b.text}</strong> : b.text)}</span> : m.sources.some((s) => s.ref === part.ref)
-            ? <button key={i} type="button" onClick={() => setOpen(open === part.ref ? null : part.ref)} className="mx-0.5 rounded px-1 font-mono text-[11px] text-accent hover:bg-accent/10">[{part.ref}]</button>
+          'text' in part ? <span key={i}>{splitBold(part.text).map((b, j) => b.bold ? <strong key={j} className="font-medium text-fg">{b.text}</strong> : b.text)}</span> : m.sources.some((s) => s.ref === part.ref)
+            ? <button key={i} type="button" onClick={() => setOpen(open === part.ref ? null : part.ref)} className="mx-0.5 rounded px-1 font-mono text-[11px] text-accent-ink hover:bg-accent/10">[{part.ref}]</button>
             : <span key={i}>[{part.ref}]</span>)}
       </p>
       {validation && validation.status === 'warning' && <p className="rounded-[var(--radius-md)] border border-warning/30 px-3 py-2 text-xs text-warning">{validation.summary}</p>}
-      {validation && validation.status === 'completed' && <p className="font-mono text-[11px] text-accent">✓ {validation.summary}</p>}
+      {validation && validation.status === 'completed' && <p className="font-mono text-[11px] text-accent-ink">✓ {validation.summary}</p>}
       {m.sources.length > 0 && (
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">Источники</p>
@@ -68,7 +68,7 @@ function Answer({ m, orgId, conversationId, inspecting, onInspect }: { m: ChatMe
             {m.sources.map((s) => (
               <li key={s.ref}>
                 <button type="button" onClick={() => setOpen(open === s.ref ? null : s.ref)} aria-expanded={open === s.ref} className="w-full truncate rounded px-1 py-0.5 text-left text-xs text-text-soft hover:bg-surface-3">
-                  <span className="font-mono text-accent">[{s.ref}]</span> {s.title}
+                  <span className="font-mono text-accent-ink">[{s.ref}]</span> {s.title}
                 </button>
               </li>
             ))}
@@ -77,13 +77,13 @@ function Answer({ m, orgId, conversationId, inspecting, onInspect }: { m: ChatMe
         </div>
       )}
       {!m.refusal && (
-        <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-border bg-black p-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-border-strong text-accent"><FileSpreadsheet className="h-4 w-4" aria-hidden /></span>
+        <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-border bg-bg p-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-border-strong text-accent-ink"><FileSpreadsheet className="h-4 w-4" aria-hidden /></span>
           <div className="min-w-0 flex-1">
             <p className="font-mono text-[10px] text-muted">XLSX · 4 листа</p>
             <p className="truncate text-[13px] text-text-soft">Анализ: ответ, источники, трасса</p>
           </div>
-          <button type="button" onClick={() => void download()} disabled={busy} className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-border-strong px-2.5 py-1.5 text-xs text-text-soft hover:border-accent hover:text-accent disabled:opacity-50">
+          <button type="button" onClick={() => void download()} disabled={busy} className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-border-strong px-2.5 py-1.5 text-xs text-text-soft hover:border-accent hover:text-accent-ink disabled:opacity-50">
             <Download className="h-3.5 w-3.5" aria-hidden />{busy ? 'Готовлю…' : 'Скачать'}
           </button>
         </div>
@@ -91,7 +91,7 @@ function Answer({ m, orgId, conversationId, inspecting, onInspect }: { m: ChatMe
       {reportError && <Alert tone="error">{reportError}</Alert>}
       <div className="flex items-center justify-between border-t border-border-subtle pt-2 font-mono text-[10px] text-muted">
         <span>{m.model ? `${m.model} · ` : ''}{m.duration_ms !== null ? `${(m.duration_ms / 1000).toFixed(1)} с` : ''}</span>
-        <button type="button" onClick={onInspect} className={inspecting ? 'text-accent' : 'hover:text-white'}>{inspecting ? '● выполнение показано' : 'Показать выполнение'}</button>
+        <button type="button" onClick={onInspect} className={inspecting ? 'text-accent-ink' : 'hover:text-fg'}>{inspecting ? '● выполнение показано' : 'Показать выполнение'}</button>
       </div>
     </article>
   )
@@ -140,7 +140,7 @@ export function ChatColumn({ orgId, orgName, status, conversations, conversation
             <p className="mt-1 truncate font-mono text-[11px] text-muted">{orgName}</p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <span className={`inline-flex items-center gap-1.5 font-mono text-[11px] ${ready ? 'text-accent' : 'text-warning'}`}>
+            <span className={`inline-flex items-center gap-1.5 font-mono text-[11px] ${ready ? 'text-accent-ink' : 'text-warning'}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${ready ? 'bg-accent' : 'bg-warning'}`} />{ready ? 'Подключено' : 'Модель не подключена'}
             </span>
             <button type="button" onClick={() => setMenu((o) => !o)} aria-expanded={menu} aria-haspopup="listbox" className="inline-flex items-center gap-1 rounded-[var(--radius-md)] border border-border px-2 py-1 text-xs text-text-soft hover:border-border-strong">
@@ -150,9 +150,9 @@ export function ChatColumn({ orgId, orgName, status, conversations, conversation
         </div>
         {menu && (
           <ul role="listbox" aria-label="Диалоги" className="absolute right-4 top-[72px] z-10 max-h-72 w-64 overflow-y-auto rounded-[var(--radius-md)] border border-border-strong bg-surface-2 p-1 shadow-xl">
-            <li><button type="button" onClick={() => { onSelectConversation(null); setMenu(false) }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[13px] text-accent hover:bg-surface-3"><MessageSquarePlus className="h-3.5 w-3.5" aria-hidden />Новый диалог</button></li>
+            <li><button type="button" onClick={() => { onSelectConversation(null); setMenu(false) }} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[13px] text-accent-ink hover:bg-surface-3"><MessageSquarePlus className="h-3.5 w-3.5" aria-hidden />Новый диалог</button></li>
             {conversations.map((c) => (
-              <li key={c.id}><button type="button" role="option" aria-selected={c.id === conversationId} onClick={() => { onSelectConversation(c.id); setMenu(false) }} className={`w-full truncate rounded px-2 py-1.5 text-left text-[13px] hover:bg-surface-3 ${c.id === conversationId ? 'text-accent' : 'text-text-soft'}`}>{c.title}</button></li>
+              <li key={c.id}><button type="button" role="option" aria-selected={c.id === conversationId} onClick={() => { onSelectConversation(c.id); setMenu(false) }} className={`w-full truncate rounded px-2 py-1.5 text-left text-[13px] hover:bg-surface-3 ${c.id === conversationId ? 'text-accent-ink' : 'text-text-soft'}`}>{c.title}</button></li>
             ))}
             {conversations.length === 0 && <li className="px-2 py-1.5 text-xs text-muted">Диалогов пока нет</li>}
           </ul>
@@ -161,12 +161,12 @@ export function ChatColumn({ orgId, orgName, status, conversations, conversation
 
       <div className="px-4 pt-3">
         <button type="button" onClick={onOpenReports} className="bi-cta flex w-full items-center gap-3 px-3.5 py-3 text-left">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#00e599]/15 text-[#00e599]"><LayoutGrid className="h-4 w-4" aria-hidden /></span>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent-ink"><LayoutGrid className="h-4 w-4" aria-hidden /></span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[13.5px] font-medium text-white">Создать отчёт через ИИ</span>
-            <span className="block truncate text-[11.5px] text-white/55">BI-конструктор: 1С, PostgreSQL, Google Таблицы, файл → дашборд</span>
+            <span className="block text-[13.5px] font-medium text-fg">Создать отчёт через ИИ</span>
+            <span className="block truncate text-[11.5px] text-fg/55">BI-конструктор: 1С, PostgreSQL, Google Таблицы, файл → дашборд</span>
           </span>
-          <ChevronRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
+          <ChevronRight className="h-4 w-4 shrink-0 text-fg/50" aria-hidden />
         </button>
       </div>
 
@@ -176,7 +176,7 @@ export function ChatColumn({ orgId, orgName, status, conversations, conversation
           <div className="rounded-[var(--radius-lg)] border border-dashed border-border-strong p-4">
             <p className="text-sm text-muted">Спросите о том, что описано в документах вашей организации:</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {SUGGESTED.map((q) => <button key={q} type="button" disabled={!ready} onClick={() => onSend(q)} className="rounded-full border border-border px-3 py-1.5 text-left text-xs text-text-soft transition-colors hover:border-accent hover:text-accent disabled:opacity-50">{q}</button>)}
+              {SUGGESTED.map((q) => <button key={q} type="button" disabled={!ready} onClick={() => onSend(q)} className="rounded-full border border-border px-3 py-1.5 text-left text-xs text-text-soft transition-colors hover:border-accent hover:text-accent-ink disabled:opacity-50">{q}</button>)}
             </div>
           </div>
         )}
@@ -197,7 +197,7 @@ export function ChatColumn({ orgId, orgName, status, conversations, conversation
         <div className="flex gap-2 rounded-[var(--radius-lg)] border border-border-strong bg-surface-2 p-1.5">
           <label htmlFor="q" className="sr-only">Ваш вопрос</label>
           <input id="q" value={text} maxLength={2000} onChange={(e) => setText(e.target.value)} placeholder="Спросите по вашим документам…" className="h-9 min-w-0 flex-1 bg-transparent px-2.5 text-sm placeholder:text-muted/70" />
-          <button type="submit" disabled={!text.trim() || sending} aria-label="Спросить" className="grid h-9 w-9 place-items-center rounded-[var(--radius-md)] bg-accent text-black transition-colors hover:bg-accent-strong disabled:opacity-40"><Send className="h-4 w-4" aria-hidden /></button>
+          <button type="submit" disabled={!text.trim() || sending} aria-label="Спросить" className="grid h-9 w-9 place-items-center rounded-[var(--radius-md)] bg-accent text-accent-contrast transition-colors hover:bg-accent-strong disabled:opacity-40"><Send className="h-4 w-4" aria-hidden /></button>
         </div>
       </form>
     </section>

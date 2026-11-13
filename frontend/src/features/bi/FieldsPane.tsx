@@ -29,11 +29,11 @@ export function FieldsPane({ visual, columns, onType, onFields }: { visual: Visu
       <Section title="Тип визуала">
         <div className="grid grid-cols-3 gap-1.5">
           {VISUALS.map((v) => (
-            <button key={v.type} type="button" aria-pressed={t === v.type} onClick={() => onType(v.type)} className={`rounded-lg border px-1.5 py-1.5 text-[11px] leading-tight transition ${t === v.type ? 'border-[#00e599]/60 bg-[#00e599]/10 text-white' : 'border-white/10 text-white/60 hover:text-white'}`}>{v.label}</button>
+            <button key={v.type} type="button" aria-pressed={t === v.type} onClick={() => onType(v.type)} className={`rounded-lg border px-1.5 py-1.5 text-[11px] leading-tight transition ${t === v.type ? 'border-accent/60 bg-accent/10 text-fg' : 'border-fg/10 text-fg/60 hover:text-fg'}`}>{v.label}</button>
           ))}
         </div>
       </Section>
-      {columns.length === 0 ? <p className="py-3 text-[12px] text-white/45">Сначала подключите данные слева.</p> : (
+      {columns.length === 0 ? <p className="py-3 text-[12px] text-fg/45">Сначала подключите данные слева.</p> : (
         <Section title="Поля">
           {t === 'card' && <><FieldSelect label="Значение" value={f.value} columns={numbers} onChange={(value) => onFields({ value, agg: value ? (f.agg === 'count' ? 'sum' : f.agg) : 'count' })} />{agg}</>}
           {['bar', 'stacked', 'barh', 'line', 'area'].includes(t) && (
@@ -50,13 +50,13 @@ export function FieldsPane({ visual, columns, onType, onFields }: { visual: Visu
           {t === 'slicer' && <FieldSelect label="Поле" value={f.category} columns={dims} onChange={(category) => onFields({ category })} />}
           {t === 'table' && (
             <>
-              <p className="text-[11px] text-white/45">Столбцы: текстовые группируют строки, числовые агрегируются.</p>
+              <p className="text-[11px] text-fg/45">Столбцы: текстовые группируют строки, числовые агрегируются.</p>
               <ul className="max-h-56 space-y-0.5 overflow-auto">
                 {columns.map((c) => (
                   <li key={c.name}>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-[12px] text-white/75 hover:bg-white/5">
-                      <input type="checkbox" className="accent-[#00e599]" checked={f.columns.includes(c.name)} onChange={(e) => onFields({ columns: e.target.checked ? [...f.columns, c.name] : f.columns.filter((x) => x !== c.name) })} />
-                      <span className="w-5 text-center font-mono text-[10px] text-white/40">{ICON[c.type]}</span><span className="truncate">{c.name}</span>
+                    <label className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-[12px] text-fg/75 hover:bg-fg/5">
+                      <input type="checkbox" className="accent-accent" checked={f.columns.includes(c.name)} onChange={(e) => onFields({ columns: e.target.checked ? [...f.columns, c.name] : f.columns.filter((x) => x !== c.name) })} />
+                      <span className="w-5 text-center font-mono text-[10px] text-fg/40">{ICON[c.type]}</span><span className="truncate">{c.name}</span>
                     </label>
                   </li>
                 ))}
@@ -64,7 +64,7 @@ export function FieldsPane({ visual, columns, onType, onFields }: { visual: Visu
               {agg}
             </>
           )}
-          {t === 'text' && <p className="text-[12px] text-white/45">Текст редактируется на вкладке «Формат».</p>}
+          {t === 'text' && <p className="text-[12px] text-fg/45">Текст редактируется на вкладке «Формат».</p>}
         </Section>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { useApplyAppTheme } from '../../stores/theme'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Check, Circle, Loader2 } from 'lucide-react'
@@ -46,13 +47,13 @@ function SimulatedStep({ title, lines }: { title: string; lines: string[] }) {
       <ul className="space-y-2">
         {lines.map((l, i) => (
           <li key={l} className="flex items-center gap-2 text-sm">
-            {i < done ? <Check className="h-4 w-4 text-accent" aria-hidden /> : running && i === done ? <Loader2 className="h-4 w-4 animate-spin text-cyan" aria-hidden /> : <Circle className="h-4 w-4 text-border-strong" aria-hidden />}
+            {i < done ? <Check className="h-4 w-4 text-accent-ink" aria-hidden /> : running && i === done ? <Loader2 className="h-4 w-4 animate-spin text-cyan" aria-hidden /> : <Circle className="h-4 w-4 text-border-strong" aria-hidden />}
             <span className={i < done ? '' : 'text-muted'}>{l}</span>
           </li>
         ))}
       </ul>
       {done < lines.length && <Button variant="secondary" size="sm" disabled={running} onClick={() => setRunning(true)}>{running ? 'Выполняется (демо)…' : 'Запустить (демо)'}</Button>}
-      {done >= lines.length && <p role="status" className="text-sm text-accent">Демо-шаг завершён.</p>}
+      {done >= lines.length && <p role="status" className="text-sm text-accent-ink">Демо-шаг завершён.</p>}
     </div>
   )
 }
@@ -66,6 +67,7 @@ const DEMO_LINES: Record<string, string[]> = {
 }
 
 export function OnboardingPage() {
+  useApplyAppTheme()
   const nav = useNavigate()
   const qc = useQueryClient()
   const { organization, isPending } = useActiveOrganization()
@@ -85,14 +87,14 @@ export function OnboardingPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-5xl px-4 py-8 sm:px-6">
-      <header className="flex items-center justify-between"><Wordmark to="/app" /><button type="button" onClick={() => nav('/app')} className="text-sm text-muted hover:text-white">Пропустить</button></header>
+      <header className="flex items-center justify-between"><Wordmark to="/app" /><button type="button" onClick={() => nav('/app')} className="text-sm text-muted hover:text-fg">Пропустить</button></header>
       <div className="mt-10 grid gap-8 md:grid-cols-[240px_1fr]">
         <nav aria-label="Шаги подключения">
           <ol className="space-y-1">
             {STEPS.map((s, i) => (
               <li key={s.id}>
-                <button type="button" disabled={i > step} onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined} className={`flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-left text-sm transition-colors ${i === step ? 'bg-surface-3 text-white' : 'text-muted'} ${i > step ? 'opacity-50' : 'hover:text-white'}`}>
-                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[10px] ${i < step ? 'border-accent bg-accent text-black' : i === step ? 'border-accent text-accent' : 'border-border-strong'}`}>{i < step ? <Check className="h-3 w-3" aria-hidden /> : i + 1}</span>
+                <button type="button" disabled={i > step} onClick={() => setStep(i)} aria-current={i === step ? 'step' : undefined} className={`flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-left text-sm transition-colors ${i === step ? 'bg-surface-3 text-fg' : 'text-muted'} ${i > step ? 'opacity-50' : 'hover:text-fg'}`}>
+                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[10px] ${i < step ? 'border-accent bg-accent text-accent-contrast' : i === step ? 'border-accent text-accent-ink' : 'border-border-strong'}`}>{i < step ? <Check className="h-3 w-3" aria-hidden /> : i + 1}</span>
                   <span className="flex-1">{s.title}</span>{s.kind === 'demo' && <span className="font-mono text-[9px] uppercase text-violet">демо</span>}
                 </button>
               </li>
@@ -112,7 +114,7 @@ export function OnboardingPage() {
                 <Field label="Юридическое название" {...form.register('legal_name')} />
                 <Field label="ИНН" inputMode="numeric" hint="10 цифр для юрлица, 12 для ИП. Необязательно." error={form.formState.errors.tax_id?.message} {...form.register('tax_id')} />
                 <fieldset><legend className="mb-2 text-[13px] text-text-soft">Используете ли вы 1С?</legend>
-                  <div className="flex gap-3">{[{ v: true, l: 'Да' }, { v: false, l: 'Нет' }].map((o) => <label key={o.l} className={`cursor-pointer rounded-[var(--radius-md)] border px-4 py-2 text-sm ${usesOnec === o.v ? 'border-accent text-accent' : 'border-border text-muted'}`}><input type="radio" name="onec" className="sr-only" checked={usesOnec === o.v} onChange={() => setUsesOnec(o.v)} />{o.l}</label>)}</div>
+                  <div className="flex gap-3">{[{ v: true, l: 'Да' }, { v: false, l: 'Нет' }].map((o) => <label key={o.l} className={`cursor-pointer rounded-[var(--radius-md)] border px-4 py-2 text-sm ${usesOnec === o.v ? 'border-accent text-accent-ink' : 'border-border text-muted'}`}><input type="radio" name="onec" className="sr-only" checked={usesOnec === o.v} onChange={() => setUsesOnec(o.v)} />{o.l}</label>)}</div>
                 </fieldset>
                 {create.isError && <Alert>{describeApiError(create.error)}</Alert>}
                 <Button type="submit" disabled={create.isPending}>{create.isPending ? 'Создаём…' : 'Создать рабочее пространство'}</Button>

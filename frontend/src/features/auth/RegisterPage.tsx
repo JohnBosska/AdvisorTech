@@ -23,7 +23,7 @@ export function RegisterPage() {
   if (isAuthenticated) return <Navigate to="/app" replace />
 
   return (
-    <AuthLayout title="Создать аккаунт" subtitle="Мы отправим 8-значный код подтверждения на email." footer={<>Уже есть аккаунт? <Link to="/login" className="text-accent hover:underline">Войти</Link></>}>
+    <AuthLayout title="Создать аккаунт" subtitle="Мы отправим 8-значный код подтверждения на email." footer={<>Уже есть аккаунт? <Link to="/login" className="text-accent-ink hover:underline">Войти</Link></>}>
       <form className="flex flex-col gap-4" noValidate onSubmit={form.handleSubmit((v) => register.mutate(v))}>
         <Field label="Имя (необязательно)" autoComplete="name" error={form.formState.errors.name?.message} {...form.register('name')} />
         <Field label="Email" type="email" autoComplete="email" error={form.formState.errors.email?.message} {...form.register('email')} />

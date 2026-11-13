@@ -6,6 +6,7 @@ import { useActiveOrganization } from '../../lib/api/hooks'
 import { useAuth } from '../../lib/auth/AuthProvider'
 import { formatDate } from '../../lib/format'
 import { PERIODS } from '../../mocks/data'
+import { ThemeSwitcher } from '../../components/ui/ThemeSwitcher'
 import { useUi } from '../../stores/ui'
 
 const ROLE = { OWNER: 'Владелец', FINANCE: 'Финансы / бухгалтерия', ANALYST: 'Аналитик', IT_ADMIN: 'IT-администратор' } as const
@@ -31,6 +32,7 @@ export function SettingsPage() {
       <Rows title="Организация" rows={organization ? [['Название', organization.name], ['Юридическое название', organization.legal_name ?? '—'], ['ИНН', organization.tax_id ?? '—'], ['Валюта отчётности', organization.reporting_currency], ['Использует 1С', organization.uses_onec === null ? 'не указано' : organization.uses_onec ? 'да' : 'нет'], ['Ваша роль', ROLE[organization.role]]] : [['Статус', 'Организация не создана']]} />
       <section className="space-y-4 rounded-[var(--radius-lg)] border border-border bg-surface-1 p-5">
         <h2 className="text-[15px] font-medium">Интерфейс</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-[13px] text-text-soft">Тема интерфейса</span><ThemeSwitcher withLabels /></div>
         <SelectField label="Период по умолчанию" value={period} onChange={(e) => setPeriod(e.target.value as typeof period)}>{PERIODS.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}</SelectField>
         <Button variant="secondary" size="sm" onClick={toggleSidebar}>{sidebarCollapsed ? 'Развернуть боковое меню' : 'Свернуть боковое меню'}</Button>
       </section>

@@ -87,14 +87,14 @@ export function DashboardPage() {
         </section>
 
         <section className="flex flex-col rounded-[var(--radius-lg)] border border-border bg-surface-1 p-5">
-          <div className="flex items-center gap-2 text-accent"><Sparkles className="h-4 w-4" aria-hidden /><h3 className="text-[15px] font-medium text-white">Что проверить дальше</h3></div>
+          <div className="flex items-center gap-2 text-accent-ink"><Sparkles className="h-4 w-4" aria-hidden /><h3 className="text-[15px] font-medium text-fg">Что проверить дальше</h3></div>
           <ul className="mt-4 flex-1 space-y-3 text-sm text-text-soft">
             <li>Маржа «Электроника» — самая низкая среди групп и продолжает снижаться.</li>
             <li>Запасы без продаж 90+ дней сконцентрированы на двух складах.</li>
             <li>Для собственного автопарка нет отметок доставки — логистика считается частично.</li>
           </ul>
           <p className="mt-3 text-xs text-muted">Шаблонные подсказки на демо-данных. Реальные формирует AI-аналитик по вашим данным.</p>
-          <Link to="/app/ai-analyst" className="mt-4 inline-flex items-center gap-2 text-sm text-accent hover:underline"><Bot className="h-4 w-4" aria-hidden />Спросить AI-аналитика</Link>
+          <Link to="/app/ai-analyst" className="mt-4 inline-flex items-center gap-2 text-sm text-accent-ink hover:underline"><Bot className="h-4 w-4" aria-hidden />Спросить AI-аналитика</Link>
         </section>
       </div>
     </div>

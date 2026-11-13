@@ -43,7 +43,7 @@ function Workspace({ orgId, orgName, role }: { orgId: number; orgName: string; r
   const select = (id: number | null) => { reset(); setConversationId(id); setInspected(null) }
 
   return (
-    <div className="grid min-h-[calc(100dvh-3.5rem)] grid-cols-1 bg-[#050606] lg:h-[calc(100dvh-3.5rem)] lg:grid-cols-[minmax(230px,22fr)_minmax(0,46fr)_minmax(340px,32fr)]">
+    <div className="grid min-h-[calc(100dvh-3.5rem)] grid-cols-1 bg-bg lg:h-[calc(100dvh-3.5rem)] lg:grid-cols-[minmax(230px,22fr)_minmax(0,46fr)_minmax(340px,32fr)]">
       <LeftInfoColumn documents={status.data?.documents} onOpenKnowledge={() => setKnowledgeOpen(true)} />
       <div className="order-last flex min-h-0 flex-col lg:order-none">
         <PipelineColumn
@@ -54,7 +54,7 @@ function Workspace({ orgId, orgName, role }: { orgId: number; orgName: string; r
           durationMs={shown?.duration_ms}
           error={live?.error}
         />
-        <button type="button" onClick={() => setKnowledgeOpen(true)} className="mx-4 mb-4 rounded-[var(--radius-md)] border border-border px-3 py-2 text-left text-[13px] text-text-soft hover:border-accent hover:text-accent lg:hidden">
+        <button type="button" onClick={() => setKnowledgeOpen(true)} className="mx-4 mb-4 rounded-[var(--radius-md)] border border-border px-3 py-2 text-left text-[13px] text-text-soft hover:border-accent hover:text-accent-ink lg:hidden">
           База знаний{status.data ? ` · ${status.data.documents}` : ''}
         </button>
       </div>

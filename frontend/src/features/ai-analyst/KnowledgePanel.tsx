@@ -37,7 +37,7 @@ export function KnowledgePanel({ orgId, role }: { orgId: number; role: string })
       {docs.data && docs.data.length === 0 && <div className="mt-4"><EmptyState title="Документов пока нет" text="Добавьте первый документ, чтобы AI мог отвечать по нему." /></div>}
       <ul className="mt-4 space-y-2">
         {docs.data?.map((d) => (
-          <li key={d.id} className="flex items-center gap-3 rounded-[var(--radius-md)] border border-border bg-black px-3 py-2 text-sm">
+          <li key={d.id} className="flex items-center gap-3 rounded-[var(--radius-md)] border border-border bg-bg px-3 py-2 text-sm">
             <FileText className="h-4 w-4 shrink-0 text-muted" aria-hidden />
             <span className="min-w-0 flex-1 truncate">{d.title}</span>
             <span className="shrink-0 font-mono text-[11px] text-muted">{d.chunk_count} фр.{d.vector_indexed ? ' · векторы' : ''}</span>
@@ -48,13 +48,13 @@ export function KnowledgePanel({ orgId, role }: { orgId: number; role: string })
       {canManage ? (
         <form onSubmit={(e) => { e.preventDefault(); add.mutate() }} className="mt-5 space-y-3">
           <label className="block text-xs text-muted">Название
-            <input value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9 w-full rounded-[var(--radius-md)] border border-border bg-black px-3 text-sm text-white" />
+            <input value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9 w-full rounded-[var(--radius-md)] border border-border bg-bg px-3 text-sm text-fg" />
           </label>
           <label className="block text-xs text-muted">Текст документа
-            <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={6} className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-black p-3 text-sm text-white" />
+            <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={6} className="mt-1 w-full rounded-[var(--radius-md)] border border-border bg-bg p-3 text-sm text-fg" />
           </label>
           <div className="flex flex-wrap items-center gap-3">
-            <label className="cursor-pointer text-xs text-accent hover:underline">Загрузить .txt / .md
+            <label className="cursor-pointer text-xs text-accent-ink hover:underline">Загрузить .txt / .md
               <input type="file" accept=".txt,.md,text/plain,text/markdown" className="sr-only" onChange={(e) => void onFile(e.target.files?.[0])} />
             </label>
             <Button type="submit" size="sm" disabled={!title.trim() || !content.trim() || add.isPending}>Добавить</Button>

@@ -47,8 +47,8 @@ export function VisualView({ v, rows, allRows, types, theme, cross, onCross, onS
       <ul className="h-full space-y-0.5 overflow-auto pr-1" style={{ fontSize: fs + 1 }}>
         {values.map((x) => (
           <li key={x}>
-            <label className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 hover:bg-white/5" style={{ color: text }}>
-              <input type="checkbox" className="accent-[#00e599]" checked={sel.has(x)} onChange={() => { const n = new Set(sel); if (n.has(x)) n.delete(x); else n.add(x); onSlicer([...n]) }} />
+            <label className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 hover:bg-fg/5" style={{ color: text }}>
+              <input type="checkbox" className="accent-accent" checked={sel.has(x)} onChange={() => { const n = new Set(sel); if (n.has(x)) n.delete(x); else n.add(x); onSlicer([...n]) }} />
               <span className="truncate">{x}</span>
             </label>
           </li>

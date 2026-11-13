@@ -92,12 +92,12 @@ export function Canvas(p: Props) {
               {sel && !narrow && (
                 <>
                   <div className="absolute right-2 top-2 flex gap-1">
-                    <button type="button" aria-label="Дублировать визуал" onClick={() => p.onDuplicate(v.id)} className="grid h-7 w-7 place-items-center rounded-lg bg-black/60 text-white/80 hover:text-white"><Copy className="h-3.5 w-3.5" /></button>
-                    <button type="button" aria-label="Удалить визуал" onClick={() => p.onDelete(v.id)} className="grid h-7 w-7 place-items-center rounded-lg bg-black/60 text-white/80 hover:text-[#f3a29f]"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button type="button" aria-label="Дублировать визуал" onClick={() => p.onDuplicate(v.id)} className="grid h-7 w-7 place-items-center rounded-lg bg-surface-3/90 text-fg/80 hover:text-fg"><Copy className="h-3.5 w-3.5" /></button>
+                    <button type="button" aria-label="Удалить визуал" onClick={() => p.onDelete(v.id)} className="grid h-7 w-7 place-items-center rounded-lg bg-surface-3/90 text-fg/80 hover:text-danger"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
-                  <span onPointerDown={(e) => { e.stopPropagation(); start(e, v, 'e') }} className="absolute right-0 top-1/2 h-10 w-2 -translate-y-1/2 cursor-ew-resize rounded-l bg-[#00e599]/70" aria-hidden />
-                  <span onPointerDown={(e) => { e.stopPropagation(); start(e, v, 's') }} className="absolute bottom-0 left-1/2 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-t bg-[#00e599]/70" aria-hidden />
-                  <span onPointerDown={(e) => { e.stopPropagation(); start(e, v, 'se') }} className="absolute bottom-0 right-0 h-3.5 w-3.5 cursor-nwse-resize rounded-tl bg-[#00e599]" aria-hidden />
+                  <span onPointerDown={(e) => { e.stopPropagation(); start(e, v, 'e') }} className="absolute right-0 top-1/2 h-10 w-2 -translate-y-1/2 cursor-ew-resize rounded-l bg-accent/70" aria-hidden />
+                  <span onPointerDown={(e) => { e.stopPropagation(); start(e, v, 's') }} className="absolute bottom-0 left-1/2 h-2 w-10 -translate-x-1/2 cursor-ns-resize rounded-t bg-accent/70" aria-hidden />
+                  <span onPointerDown={(e) => { e.stopPropagation(); start(e, v, 'se') }} className="absolute bottom-0 right-0 h-3.5 w-3.5 cursor-nwse-resize rounded-tl bg-accent" aria-hidden />
                 </>
               )}
             </section>

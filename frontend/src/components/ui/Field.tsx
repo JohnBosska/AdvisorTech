@@ -2,7 +2,7 @@ import { forwardRef, useId, type InputHTMLAttributes, type SelectHTMLAttributes 
 
 interface Shared { label: string; error?: string; hint?: string }
 const control = (error?: string) =>
-  `h-10 w-full rounded-[var(--radius-md)] border bg-surface-1 px-3 text-sm text-white placeholder:text-muted/70 transition-colors hover:border-border-strong ${error ? 'border-danger' : 'border-border'}`
+  `h-10 w-full rounded-[var(--radius-md)] border bg-surface-1 px-3 text-sm text-fg placeholder:text-muted/70 transition-colors hover:border-border-strong ${error ? 'border-danger' : 'border-border'}`
 
 function Wrapper({ id, label, error, hint, children }: Shared & { id: string; children: React.ReactNode }) {
   return (

@@ -4,7 +4,7 @@ import { Button } from '../ui/Button'
 
 export function Alert({ tone = 'error', children }: { tone?: 'error' | 'success' | 'warning' | 'info'; children: ReactNode }) {
   const Icon = tone === 'success' ? CheckCircle2 : AlertTriangle
-  const cls = { error: 'border-danger/40 text-danger', success: 'border-accent/40 text-accent', warning: 'border-warning/40 text-warning', info: 'border-cyan/40 text-cyan' }[tone]
+  const cls = { error: 'border-danger/40 text-danger', success: 'border-accent/40 text-accent-ink', warning: 'border-warning/40 text-warning', info: 'border-cyan/40 text-cyan' }[tone]
   return (
     <div role={tone === 'error' ? 'alert' : 'status'} className={`flex items-start gap-2 rounded-[var(--radius-md)] border px-3 py-2 text-sm ${cls}`}>
       <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />

@@ -3,7 +3,7 @@ import type { ComponentType } from 'react'
 
 export type Tone = 'success' | 'warning' | 'danger' | 'neutral' | 'info'
 const tones: Record<Tone, string> = {
-  success: 'border-accent/40 text-accent',
+  success: 'border-accent/40 text-accent-ink',
   warning: 'border-warning/40 text-warning',
   danger: 'border-danger/40 text-danger',
   neutral: 'border-border-strong text-muted',

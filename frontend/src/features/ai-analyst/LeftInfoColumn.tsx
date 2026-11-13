@@ -13,13 +13,13 @@ export function LeftInfoColumn({ documents, onOpenKnowledge }: { documents: numb
         {BLOCKS.map((b, i) => (
           <div key={b.label} className="rise" style={{ animationDelay: `${i * 90}ms` }}>
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">{b.label}</p>
-            <h2 className="mt-3 text-[22px] font-medium leading-tight tracking-[-0.02em] text-[#F4F5F4]">{b.title}</h2>
+            <h2 className="mt-3 text-[22px] font-medium leading-tight tracking-[-0.02em] text-fg">{b.title}</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">{b.text}</p>
           </div>
         ))}
       </div>
       <div className="space-y-3 border-t border-border-subtle pt-5">
-        <button type="button" onClick={onOpenKnowledge} className="flex w-full items-center gap-2 rounded-[var(--radius-md)] border border-border px-3 py-2 text-left text-[13px] text-text-soft transition-colors hover:border-accent hover:text-accent">
+        <button type="button" onClick={onOpenKnowledge} className="flex w-full items-center gap-2 rounded-[var(--radius-md)] border border-border px-3 py-2 text-left text-[13px] text-text-soft transition-colors hover:border-accent hover:text-accent-ink">
           <Database className="h-4 w-4" aria-hidden />База знаний{documents !== undefined ? ` · ${documents}` : ''}
         </button>
         <p className="font-mono text-[10px] leading-relaxed text-muted">Данные 1С: не подключены. Ответы строятся только по загруженным документам.</p>

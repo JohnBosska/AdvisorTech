@@ -17,11 +17,11 @@ export function ChartCard({ title, unit, period, summary, children, action }: { 
   )
 }
 
-export const chartColors = { primary: '#34d59a', cyan: '#62ddeb', blue: '#557eea', violet: '#8a74d6', grid: '#1d2023', axis: '#94979e' }
+export const chartColors = { primary: '#34d59a', cyan: '#62ddeb', blue: '#557eea', violet: '#8a74d6', grid: 'var(--color-border)', axis: 'var(--color-muted)' }
 
 export const tooltipStyle = {
-  contentStyle: { background: '#121413', border: '1px solid #3a3e44', borderRadius: 6, fontSize: 12, color: '#fff' },
-  labelStyle: { color: '#94979e' },
+  contentStyle: { background: 'var(--color-surface-1)', border: '1px solid var(--color-border-strong)', borderRadius: 6, fontSize: 12, color: 'var(--color-fg)' },
+  labelStyle: { color: 'var(--color-muted)' },
   itemStyle: { color: '#fff' },
-  cursor: { fill: 'rgb(255 255 255 / 4%)' },
+  cursor: { fill: 'color-mix(in srgb, var(--color-fg) 5%, transparent)' },
 }

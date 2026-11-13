@@ -20,7 +20,7 @@ export function DataInfrastructurePage() {
           { icon: DatabaseBackup, l: 'Резервные копии', v: INFRA.backup.state, extra: <span className="text-xs text-muted">последняя {formatDateTime(INFRA.backup.lastAt)}</span> },
         ].map(({ icon: Icon, l, v, extra }) => (
           <section key={l} aria-label={l} className="rounded-[var(--radius-lg)] border border-border bg-surface-1 p-5">
-            <Icon className="h-4 w-4 text-accent" aria-hidden />
+            <Icon className="h-4 w-4 text-accent-ink" aria-hidden />
             <p className="mt-3 text-xs text-muted">{l}</p><p className="mt-1 text-lg font-semibold">{v}</p><div className="mt-2">{extra}</div>
           </section>
         ))}
@@ -37,7 +37,7 @@ export function DataInfrastructurePage() {
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[520px] text-sm"><caption className="sr-only">Слои аналитической базы</caption>
             <thead className="text-xs text-muted"><tr><th className="py-2 text-left font-medium">Слой</th><th className="py-2 text-left font-medium">Назначение</th><th className="py-2 text-right font-medium">Строк</th><th className="py-2 text-right font-medium">Обновлён</th></tr></thead>
-            <tbody>{INFRA.layers.map((l) => <tr key={l.name} className="border-t border-border"><td className="py-2.5 font-mono text-xs text-accent">{l.name}</td><td className="py-2.5 text-muted">{l.desc}</td><td className="tabular py-2.5 text-right">{formatNumber(l.rows)}</td><td className="py-2.5 text-right text-muted">{formatDateTime(l.updated)}</td></tr>)}</tbody>
+            <tbody>{INFRA.layers.map((l) => <tr key={l.name} className="border-t border-border"><td className="py-2.5 font-mono text-xs text-accent-ink">{l.name}</td><td className="py-2.5 text-muted">{l.desc}</td><td className="tabular py-2.5 text-right">{formatNumber(l.rows)}</td><td className="py-2.5 text-right text-muted">{formatDateTime(l.updated)}</td></tr>)}</tbody>
           </table>
         </div>
       </section>

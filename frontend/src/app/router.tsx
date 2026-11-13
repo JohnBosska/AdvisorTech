@@ -31,7 +31,7 @@ function NotFound() {
     <main className="flex min-h-screen flex-col items-center justify-center gap-4">
       <p className="eyebrow">404</p>
       <h1 className="text-2xl font-semibold">Страница не найдена</h1>
-      <Link to="/" className="text-accent hover:underline">На главную</Link>
+      <Link to="/" className="text-accent-ink hover:underline">На главную</Link>
     </main>
   )
 }

@@ -16,6 +16,9 @@ import { ReportsDialog } from './ReportsDialog'
 import { THEMES } from './theme'
 import { emptySpec, findSpot, newPage, newVisual, uid, VISUALS, type CrossFilter, type Fields, type Format, type ReportSpec, type ThemeId, type Visual, type VisualType } from './types'
 import { useHistory } from './useHistory'
+import { usePanel } from './usePanel'
+import { ThemeSwitcher } from '../../components/ui/ThemeSwitcher'
+import { useResolvedTheme } from '../../stores/theme'
 
 const IDEAS = ['Динамика выручки по месяцам', 'Топ-10 товарных групп', 'Структура продаж по складам', 'Ключевые показатели']
 
@@ -63,7 +66,8 @@ function download(name: string, text: string) {
 }
 
 export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId: number; aiReady: boolean; mode?: 'overlay' | 'page'; onClose?: () => void }) {
-  const history = useHistory<ReportSpec>(emptySpec())
+  const appTheme = useResolvedTheme()
+  const history = useHistory<ReportSpec>({ ...emptySpec(), theme: appTheme === 'light' ? 'light' : 'neon' })
   const spec = history.state
   const setSpec = history.set
   const [pageId, setPageId] = useState(spec.pages[0].id)
@@ -75,7 +79,8 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
   const [dirty, setDirty] = useState(false)
   const [editing, setEditing] = useState(true)
   const [rightTab, setRightTab] = useState<'fields' | 'format' | 'filters'>('fields')
-  const [leftOpen, setLeftOpen] = useState(true)
+  const left = usePanel('left', 'left', { width: 290, min: 240, max: 480 })
+  const right = usePanel('right', 'right', { width: 330, min: 280, max: 520 })
   const [sourceKind, setSourceKind] = useState<'warehouse' | 'file' | 'url' | 'onec' | 'postgres'>('warehouse')
   const [cross, setCross] = useState<CrossFilter | null>(null)
   const [prompt, setPrompt] = useState('')
@@ -217,55 +222,58 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
     return () => { document.body.style.overflow = prev }
   }, [mode])
 
-  const tabBtn = (id: typeof rightTab, label: string) => <button type="button" role="tab" aria-selected={rightTab === id} onClick={() => setRightTab(id)} className={`flex-1 rounded-lg py-1.5 text-[12px] transition ${rightTab === id ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white'}`}>{label}</button>
-  const iconBtn = 'grid h-8 w-8 place-items-center rounded-lg text-white/70 transition hover:bg-white/10 hover:text-white disabled:opacity-30'
+  const tabBtn = (id: typeof rightTab, label: string) => <button type="button" role="tab" aria-selected={rightTab === id} onClick={() => setRightTab(id)} className={`flex-1 rounded-lg py-1.5 text-[12px] transition ${rightTab === id ? 'bg-fg/10 text-fg' : 'text-fg/50 hover:text-fg'}`}>{label}</button>
+  const iconBtn = 'grid h-8 w-8 place-items-center rounded-lg text-fg/70 transition hover:bg-fg/10 hover:text-fg disabled:opacity-30'
 
   return (
     <div role={mode === 'overlay' ? 'dialog' : undefined} aria-modal={mode === 'overlay' || undefined} aria-label="BI-студия" className={`bi-studio glass-stage flex flex-col overflow-hidden ${mode === 'overlay' ? 'fixed inset-0 z-50' : 'relative h-[calc(100dvh-3.5rem)]'}`}>
       {/* top bar */}
-      <header className="bi-noprint relative z-10 flex flex-wrap items-center gap-2 border-b border-white/[0.08] px-3 py-2 sm:px-4">
-        <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#00e599]/15 text-[#00e599]"><LayoutGrid className="h-4 w-4" aria-hidden /></span>
+      <header className="bi-noprint relative z-10 flex flex-wrap items-center gap-2 border-b border-fg/[0.08] px-3 py-2 sm:px-4">
+        <span className="grid h-8 w-8 place-items-center rounded-xl bg-accent/15 text-accent-ink"><LayoutGrid className="h-4 w-4" aria-hidden /></span>
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/45">BI-студия{dirty ? ' · не сохранено' : reportId ? ' · сохранено' : ''}</p>
-          <input aria-label="Название отчёта" value={title} maxLength={160} onChange={(e) => { setTitle(e.target.value); setDirty(true) }} className="w-full truncate bg-transparent text-[15px] font-medium text-white outline-none" />
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-fg/45">BI-студия{dirty ? ' · не сохранено' : reportId ? ' · сохранено' : ''}</p>
+          <input aria-label="Название отчёта" value={title} maxLength={160} onChange={(e) => { setTitle(e.target.value); setDirty(true) }} className="w-full truncate bg-transparent text-[15px] font-medium text-fg outline-none" />
         </div>
         <div className="flex items-center gap-0.5">
           <button type="button" aria-label="Отменить (Ctrl+Z)" title="Отменить (Ctrl+Z)" disabled={!history.canUndo} onClick={history.undo} className={iconBtn}><Undo2 className="h-4 w-4" /></button>
           <button type="button" aria-label="Повторить (Ctrl+Shift+Z)" title="Повторить" disabled={!history.canRedo} onClick={history.redo} className={iconBtn}><Redo2 className="h-4 w-4" /></button>
-          <select aria-label="Тема" value={spec.theme} onChange={(e) => change((s) => ({ ...s, theme: e.target.value as ThemeId }))} className="ml-1 h-8 rounded-lg border border-white/10 bg-white/[0.04] px-2 text-[12px] text-white outline-none">
+          <span className="ml-1 hidden lg:inline-flex"><ThemeSwitcher /></span>
+          <select aria-label="Тема отчёта" title="Оформление страниц отчёта (не зависит от темы интерфейса)" value={spec.theme} onChange={(e) => change((s) => ({ ...s, theme: e.target.value as ThemeId }))} className="ml-1 h-8 rounded-lg border border-fg/10 bg-fg/[0.04] px-2 text-[12px] text-fg outline-none">
             {Object.values(THEMES).map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
           </select>
           <button type="button" onClick={() => { setEditing((x) => !x); setSelectedId(null) }} className="glass-btn ml-1 py-1.5 text-[12px]">{editing ? <><Eye className="h-3.5 w-3.5" aria-hidden />Просмотр</> : <><Pencil className="h-3.5 w-3.5" aria-hidden />Редактировать</>}</button>
           {(source.kind === 'url' || source.kind === 'warehouse') && <button type="button" aria-label="Обновить данные" title={source.kind === 'url' ? 'Обновить данные по ссылке' : 'Обновить данные из хранилища'} disabled={busy !== null} onClick={() => void refresh()} className={iconBtn}><RefreshCw className={`h-4 w-4 ${busy === 'refresh' ? 'animate-spin' : ''}`} /></button>}
           <button type="button" aria-label="Открыть отчёт" title="Открыть" onClick={() => setOpenList(true)} className={iconBtn}><FolderOpen className="h-4 w-4" /></button>
           <button type="button" aria-label="Печать или PDF" title="Печать / PDF" onClick={() => window.print()} className={iconBtn}><Printer className="h-4 w-4" /></button>
-          <button type="button" disabled={busy !== null} onClick={() => void save()} className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-full bg-[#00e599] px-3.5 text-[12.5px] font-medium text-black transition hover:brightness-110 disabled:opacity-50"><Save className="h-3.5 w-3.5" aria-hidden />{busy === 'save' ? 'Сохраняю…' : 'Сохранить'}</button>
-          {onClose && <button type="button" onClick={close} aria-label="Закрыть BI-студию" className="ml-1 grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-white/70 hover:text-white"><X className="h-4 w-4" /></button>}
+          <button type="button" disabled={busy !== null} onClick={() => void save()} className="ml-1 inline-flex h-8 items-center gap-1.5 rounded-full bg-accent px-3.5 text-[12.5px] font-medium text-accent-contrast transition hover:brightness-110 disabled:opacity-50"><Save className="h-3.5 w-3.5" aria-hidden />{busy === 'save' ? 'Сохраняю…' : 'Сохранить'}</button>
+          {onClose && <button type="button" onClick={close} aria-label="Закрыть BI-студию" className="ml-1 grid h-8 w-8 place-items-center rounded-full border border-fg/10 bg-fg/[0.04] text-fg/70 hover:text-fg"><X className="h-4 w-4" /></button>}
         </div>
       </header>
 
-      <div className="relative z-10 grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:overflow-hidden" style={{ gridTemplateColumns: undefined }}>
-        <div className={`grid min-h-0 grid-cols-1 lg:h-full ${editing ? (leftOpen ? 'lg:grid-cols-[290px_minmax(0,1fr)_320px]' : 'lg:grid-cols-[44px_minmax(0,1fr)_320px]') : 'lg:grid-cols-[minmax(0,1fr)]'}`}>
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
           {/* left: data + AI */}
           {editing && (
-            <aside className="bi-noprint min-h-0 border-white/[0.07] lg:overflow-y-auto lg:border-r">
-              <button type="button" onClick={() => setLeftOpen((o) => !o)} aria-label={leftOpen ? 'Свернуть панель данных' : 'Развернуть панель данных'} className="hidden w-full items-center justify-end p-2 text-white/50 hover:text-white lg:flex">{leftOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</button>
-              {leftOpen && (
+            <aside aria-label="Данные" className="bi-noprint relative min-h-0 shrink-0 border-border bg-surface-1 lg:overflow-y-auto lg:border-r lg:[width:var(--w)]" style={{ ['--w' as string]: left.collapsed ? '44px' : `${left.width}px` }}>
+              <div className="sticky top-0 z-10 hidden items-center justify-between border-b border-border bg-surface-1 px-2 py-1.5 lg:flex">
+                {!left.collapsed && <span className="px-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted">Данные</span>}
+                <button type="button" onClick={left.toggle} aria-label={left.collapsed ? 'Развернуть панель данных' : 'Свернуть панель данных'} aria-expanded={!left.collapsed} className="grid h-7 w-7 place-items-center rounded-md text-muted hover:bg-hover hover:text-fg">{left.collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
+              </div>
+              {!left.collapsed && (
                 <div className="space-y-3 px-3 pb-4">
                   <section className="glass p-3">
-                    <p className="flex items-center gap-2 text-[13px] font-medium text-white"><Database className="h-4 w-4 text-[#00e599]" aria-hidden />Данные</p>
-                    <div className="mt-2.5 flex rounded-xl bg-black/30 p-1 text-[11.5px]" role="tablist" aria-label="Источник данных">
+                    <p className="flex items-center gap-2 text-[13px] font-medium text-fg"><Database className="h-4 w-4 text-accent-ink" aria-hidden />Данные</p>
+                    <div className="mt-2.5 flex rounded-xl bg-fg/[0.06] p-1 text-[11.5px]" role="tablist" aria-label="Источник данных">
                       {([['warehouse', 'Хранилище'], ['file', 'Файл'], ['url', 'Ссылка'], ['onec', '1С'], ['postgres', 'Postgres']] as const).map(([id, label]) => (
-                        <button key={id} type="button" role="tab" aria-selected={sourceKind === id} onClick={() => setSourceKind(id)} className={`flex-1 rounded-lg px-1 py-1.5 transition ${sourceKind === id ? 'bg-white/10 text-white' : 'text-white/50'}`}>{label}</button>
+                        <button key={id} type="button" role="tab" aria-selected={sourceKind === id} onClick={() => setSourceKind(id)} className={`flex-1 rounded-lg px-1 py-1.5 transition ${sourceKind === id ? 'bg-fg/10 text-fg' : 'text-fg/50'}`}>{label}</button>
                       ))}
                     </div>
                     {sourceKind === 'file' && (
                       <>
                         <input ref={fileRef} type="file" accept=".csv,.xlsx,.txt" className="sr-only" aria-label="Файл с данными" onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = '' }} />
-                        <button type="button" onClick={() => fileRef.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); void upload(e.dataTransfer.files[0]) }} className="mt-2.5 flex w-full flex-col items-center gap-1 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-3 py-4 text-center transition hover:border-[#00e599]/50">
-                          <FileUp className="h-5 w-5 text-white/60" aria-hidden />
-                          <span className="text-[12.5px] text-white">{busy === 'upload' ? 'Читаю файл…' : 'CSV или XLSX'}</span>
-                          <span className="text-[11px] text-white/40">до 5 МБ, первая строка — заголовки</span>
+                        <button type="button" onClick={() => fileRef.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); void upload(e.dataTransfer.files[0]) }} className="mt-2.5 flex w-full flex-col items-center gap-1 rounded-2xl border border-dashed border-fg/15 bg-fg/[0.02] px-3 py-4 text-center transition hover:border-accent/50">
+                          <FileUp className="h-5 w-5 text-fg/60" aria-hidden />
+                          <span className="text-[12.5px] text-fg">{busy === 'upload' ? 'Читаю файл…' : 'CSV или XLSX'}</span>
+                          <span className="text-[11px] text-fg/40">до 5 МБ, первая строка — заголовки</span>
                         </button>
                       </>
                     )}
@@ -274,42 +282,43 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
                     {(sourceKind === 'onec' || sourceKind === 'postgres') && <SourcePanel key={sourceKind} orgId={orgId} kind={sourceKind} onLoaded={(d, label) => accept(d, { kind: sourceKind, label })} onError={fail} />}
                     {data && (
                       <>
-                        <p className="mt-3 truncate text-[12px] text-white/70"><span className="text-[#00e599]">●</span> {source.label || data.filename}</p>
+                        <p className="mt-3 truncate text-[12px] text-fg/70"><span className="text-accent-ink">●</span> {source.label || data.filename}</p>
                         <ul className="mt-2 flex flex-wrap gap-1" aria-label="Поля данных">
-                          {data.columns.map((c) => <li key={c.name} className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 font-mono text-[10.5px] text-white/65"><span className={c.type === 'number' ? 'text-[#00e599]' : c.type === 'date' ? 'text-[#5b8def]' : 'text-white/40'}>{c.type === 'number' ? '#' : c.type === 'date' ? '◷' : 'Aa'}</span> {c.name}</li>)}
+                          {data.columns.map((c) => <li key={c.name} className="rounded-full border border-fg/10 bg-fg/[0.03] px-2 py-0.5 font-mono text-[10.5px] text-fg/65"><span className={c.type === 'number' ? 'text-accent-ink' : c.type === 'date' ? 'text-blue' : 'text-fg/40'}>{c.type === 'number' ? '#' : c.type === 'date' ? '◷' : 'Aa'}</span> {c.name}</li>)}
                         </ul>
                       </>
                     )}
                   </section>
 
                   <section className="glass p-3">
-                    <p className="flex items-center gap-2 text-[13px] font-medium text-white"><Sparkles className="h-4 w-4 text-[#00e599]" aria-hidden />Отчёт через ИИ</p>
-                    {!data ? <p className="mt-2 text-[12px] text-white/45">Сначала подключите данные.</p> : (
+                    <p className="flex items-center gap-2 text-[13px] font-medium text-fg"><Sparkles className="h-4 w-4 text-accent-ink" aria-hidden />Отчёт через ИИ</p>
+                    {!data ? <p className="mt-2 text-[12px] text-fg/45">Сначала подключите данные.</p> : (
                       <form onSubmit={(e) => void plan(e)} className="mt-2.5 space-y-2">
-                        {!aiReady && <p className="text-[12px] text-[#e6b85c]">ИИ-модель не подключена — соберите отчёт вручную.</p>}
+                        {!aiReady && <p className="text-[12px] text-warning">ИИ-модель не подключена — соберите отчёт вручную.</p>}
                         <div className="glass-input flex items-end gap-2 p-1.5">
                           <label htmlFor="bi-q" className="sr-only">Опишите отчёт</label>
-                          <textarea id="bi-q" rows={3} value={prompt} maxLength={1000} onChange={(e) => setPrompt(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void plan() } }} placeholder="Например: выручка по месяцам и топ групп" className="min-h-[56px] flex-1 resize-none bg-transparent px-2 py-1 text-[12.5px] text-white outline-none placeholder:text-white/35" />
-                          <button type="submit" disabled={!prompt.trim() || busy !== null || !aiReady} aria-label="Собрать отчёт" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#00e599] text-black disabled:opacity-35"><ArrowUp className="h-4 w-4" aria-hidden /></button>
+                          <textarea id="bi-q" rows={3} value={prompt} maxLength={1000} onChange={(e) => setPrompt(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void plan() } }} placeholder="Например: выручка по месяцам и топ групп" className="min-h-[56px] flex-1 resize-none bg-transparent px-2 py-1 text-[12.5px] text-fg outline-none placeholder:text-fg/35" />
+                          <button type="submit" disabled={!prompt.trim() || busy !== null || !aiReady} aria-label="Собрать отчёт" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent text-accent-contrast disabled:opacity-35"><ArrowUp className="h-4 w-4" aria-hidden /></button>
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {IDEAS.map((q) => <button key={q} type="button" disabled={busy !== null || !aiReady} onClick={() => void plan(undefined, q)} className="glass-chip text-[11.5px] disabled:opacity-40">{q}</button>)}
                         </div>
-                        <p className="text-[10.5px] leading-relaxed text-white/35">ИИ видит только названия колонок и по три примера значений; числа считаются в браузере.</p>
+                        <p className="text-[10.5px] leading-relaxed text-fg/35">ИИ видит только названия колонок и по три примера значений; числа считаются в браузере.</p>
                       </form>
                     )}
                   </section>
-                  {busy === 'plan' && <p className="flex items-center gap-2 px-1 text-[12px] text-white/70"><span className="glass-spinner" aria-hidden />ИИ проектирует отчёт…</p>}
-                  {error && <p role="alert" className="glass border-[#e0645f]/40 px-3 py-2.5 text-[12.5px] text-[#f3a29f]">{error}</p>}
-                  {note && !error && <p role="status" className="px-1 text-[11.5px] text-white/50">{note}</p>}
+                  {busy === 'plan' && <p className="flex items-center gap-2 px-1 text-[12px] text-fg/70"><span className="glass-spinner" aria-hidden />ИИ проектирует отчёт…</p>}
+                  {error && <p role="alert" className="glass border-danger/40 px-3 py-2.5 text-[12.5px] text-danger">{error}</p>}
+                  {note && !error && <p role="status" className="px-1 text-[11.5px] text-fg/50">{note}</p>}
                 </div>
               )}
             </aside>
           )}
+          {editing && !left.collapsed && <div role="separator" aria-orientation="vertical" aria-label="Ширина панели данных" tabIndex={0} onPointerDown={left.startResize} onKeyDown={(e) => { if (e.key === 'ArrowLeft') left.nudge(-16); if (e.key === 'ArrowRight') left.nudge(16) }} className="bi-noprint hidden w-1 shrink-0 cursor-col-resize bg-transparent transition-colors hover:bg-accent/40 focus-visible:bg-accent/60 lg:block" />}
 
           {/* canvas */}
-          <main className="min-h-[420px] min-w-0 lg:overflow-y-auto" style={{ background: theme.canvas }} aria-label="Холст отчёта">
-            {!editing && error && <p role="alert" className="mx-4 mt-3 text-[12.5px] text-[#f3a29f]">{error}</p>}
+          <main className="min-h-[420px] min-w-0 flex-1 lg:overflow-y-auto" style={{ background: theme.canvas }} aria-label="Холст отчёта">
+            {!editing && error && <p role="alert" className="mx-4 mt-3 text-[12.5px] text-danger">{error}</p>}
             <div className="p-2 sm:p-3">
               <Canvas
                 page={page} reportFilters={spec.filters} data={data} types={types} theme={theme} editing={editing}
@@ -325,17 +334,22 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
           </main>
 
           {/* right: visuals / fields / format / filters */}
+          {editing && !right.collapsed && <div role="separator" aria-orientation="vertical" aria-label="Ширина панели свойств" tabIndex={0} onPointerDown={right.startResize} onKeyDown={(e) => { if (e.key === 'ArrowLeft') right.nudge(16); if (e.key === 'ArrowRight') right.nudge(-16) }} className="bi-noprint hidden w-1 shrink-0 cursor-col-resize bg-transparent transition-colors hover:bg-accent/40 focus-visible:bg-accent/60 lg:block" />}
           {editing && (
-            <aside className="bi-noprint min-h-0 border-white/[0.07] lg:overflow-y-auto lg:border-l">
-              <div className="space-y-3 p-3">
+            <aside aria-label="Визуализации и свойства" className="bi-noprint relative min-h-0 shrink-0 border-border bg-surface-1 lg:overflow-y-auto lg:border-l lg:[width:var(--w)]" style={{ ['--w' as string]: right.collapsed ? '44px' : `${right.width}px` }}>
+              <div className="sticky top-0 z-10 hidden items-center justify-between border-b border-border bg-surface-1 px-2 py-1.5 lg:flex">
+                <button type="button" onClick={right.toggle} aria-label={right.collapsed ? 'Развернуть панель свойств' : 'Свернуть панель свойств'} aria-expanded={!right.collapsed} className="grid h-7 w-7 place-items-center rounded-md text-muted hover:bg-hover hover:text-fg">{right.collapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</button>
+                {!right.collapsed && <span className="px-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted">Визуализации и свойства</span>}
+              </div>
+              {!right.collapsed && <div className="space-y-3 p-3">
                 <section className="glass p-3">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-white/50">Добавить визуал</p>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-fg/50">Добавить визуал</p>
                   <div className="mt-2 grid grid-cols-3 gap-1.5">
-                    {VISUALS.map((v) => <button key={v.type} type="button" onClick={() => addVisual(v.type)} className="flex items-center gap-1 rounded-lg border border-white/10 px-1.5 py-1.5 text-left text-[11px] leading-tight text-white/70 transition hover:border-[#00e599]/50 hover:text-white"><Plus className="h-3 w-3 shrink-0 text-[#00e599]" aria-hidden />{v.label}</button>)}
+                    {VISUALS.map((v) => <button key={v.type} type="button" onClick={() => addVisual(v.type)} className="flex items-center gap-1 rounded-lg border border-fg/10 px-1.5 py-1.5 text-left text-[11px] leading-tight text-fg/70 transition hover:border-accent/50 hover:text-fg"><Plus className="h-3 w-3 shrink-0 text-accent-ink" aria-hidden />{v.label}</button>)}
                   </div>
                 </section>
                 <section className="glass p-3">
-                  <div className="flex rounded-xl bg-black/30 p-1" role="tablist" aria-label="Панель свойств">
+                  <div className="flex rounded-xl bg-fg/[0.06] p-1" role="tablist" aria-label="Панель свойств">
                     {tabBtn('fields', 'Поля')}{tabBtn('format', 'Формат')}{tabBtn('filters', 'Фильтры')}
                   </div>
                   <div className="mt-2">
@@ -343,7 +357,7 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
                       <FiltersPane data={data} types={types} pageFilters={page.filters} reportFilters={spec.filters}
                         onPage={(filters) => changePage((p) => ({ ...p, filters }))} onReport={(filters) => change((s) => ({ ...s, filters }))} />
                     ) : !selected ? (
-                      <p className="py-3 text-[12px] leading-relaxed text-white/45">Выберите визуал на холсте, чтобы настроить поля и формат. Перетаскивайте визуалы мышью, тяните за зелёные ручки, чтобы менять размер; стрелки двигают, Shift+стрелки меняют размер, Delete удаляет, Ctrl+D дублирует.</p>
+                      <p className="py-3 text-[12px] leading-relaxed text-fg/45">Выберите визуал на холсте, чтобы настроить поля и формат. Перетаскивайте визуалы мышью, тяните за зелёные ручки, чтобы менять размер; стрелки двигают, Shift+стрелки меняют размер, Delete удаляет, Ctrl+D дублирует.</p>
                     ) : rightTab === 'fields' ? (
                       <FieldsPane visual={selected} columns={data?.columns ?? []}
                         onType={(type) => changeVisual(selected.id, (v) => ({ ...v, type, format: { ...v.format, sort: type === 'line' || type === 'area' ? 'cat-asc' : v.format.sort, legend: (type === 'pie' || type === 'donut') && v.format.legend === 'none' ? 'right' : v.format.legend }, fields: { ...v.fields, ...(type === 'table' && !v.fields.columns.length ? { columns: [v.fields.category, v.fields.value].filter((c): c is string => !!c) } : {}) } }))}
@@ -354,26 +368,25 @@ export function BiStudio({ orgId, aiReady, mode = 'overlay', onClose }: { orgId:
                   </div>
                   {selected && rightTab !== 'filters' && data && <button type="button" onClick={exportSelected} className="glass-btn mt-3 w-full justify-center text-[12px]"><Download className="h-3.5 w-3.5" aria-hidden />Данные визуала в CSV</button>}
                 </section>
-              </div>
+              </div>}
             </aside>
           )}
-        </div>
       </div>
 
       {/* pages */}
-      <nav className="bi-noprint relative z-10 flex items-center gap-1 overflow-x-auto border-t border-white/[0.08] px-3 py-1.5" aria-label="Страницы отчёта">
+      <nav className="bi-noprint relative z-10 flex items-center gap-1 overflow-x-auto border-t border-fg/[0.08] px-3 py-1.5" aria-label="Страницы отчёта">
         {spec.pages.map((p) => (
-          <div key={p.id} className={`flex shrink-0 items-center rounded-lg ${p.id === page.id ? 'bg-white/10' : ''}`}>
+          <div key={p.id} className={`flex shrink-0 items-center rounded-lg ${p.id === page.id ? 'bg-fg/10' : ''}`}>
             {renaming === p.id ? (
-              <input autoFocus aria-label="Название страницы" defaultValue={p.name} maxLength={40} onBlur={(e) => { const name = e.target.value.trim() || p.name; change((s) => ({ ...s, pages: s.pages.map((x) => (x.id === p.id ? { ...x, name } : x)) })); setRenaming(null) }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} className="h-7 w-32 rounded-md bg-black/40 px-2 text-[12px] text-white outline-none" />
+              <input autoFocus aria-label="Название страницы" defaultValue={p.name} maxLength={40} onBlur={(e) => { const name = e.target.value.trim() || p.name; change((s) => ({ ...s, pages: s.pages.map((x) => (x.id === p.id ? { ...x, name } : x)) })); setRenaming(null) }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }} className="h-7 w-32 rounded-md bg-fg/[0.06] px-2 text-[12px] text-fg outline-none" />
             ) : (
-              <button type="button" onClick={() => { setPageId(p.id); setSelectedId(null); setCross(null) }} onDoubleClick={() => editing && setRenaming(p.id)} className={`px-3 py-1.5 text-[12px] ${p.id === page.id ? 'text-white' : 'text-white/55 hover:text-white'}`} title="Двойной клик — переименовать">{p.name}</button>
+              <button type="button" onClick={() => { setPageId(p.id); setSelectedId(null); setCross(null) }} onDoubleClick={() => editing && setRenaming(p.id)} className={`px-3 py-1.5 text-[12px] ${p.id === page.id ? 'text-fg' : 'text-fg/55 hover:text-fg'}`} title="Двойной клик — переименовать">{p.name}</button>
             )}
-            {editing && p.id === page.id && spec.pages.length > 1 && <button type="button" aria-label={`Удалить страницу «${p.name}»`} onClick={() => { const rest = spec.pages.filter((x) => x.id !== p.id); change((s) => ({ ...s, pages: rest })); setPageId(rest[0].id) }} className="pr-2 text-white/40 hover:text-[#f3a29f]"><X className="h-3 w-3" /></button>}
+            {editing && p.id === page.id && spec.pages.length > 1 && <button type="button" aria-label={`Удалить страницу «${p.name}»`} onClick={() => { const rest = spec.pages.filter((x) => x.id !== p.id); change((s) => ({ ...s, pages: rest })); setPageId(rest[0].id) }} className="pr-2 text-fg/40 hover:text-danger"><X className="h-3 w-3" /></button>}
           </div>
         ))}
-        {editing && <button type="button" onClick={() => { const np = newPage(`Страница ${spec.pages.length + 1}`); change((s) => ({ ...s, pages: [...s.pages, np] })); setPageId(np.id); setSelectedId(null) }} aria-label="Добавить страницу" className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white"><Plus className="h-4 w-4" /></button>}
-        {cross && <button type="button" onClick={() => setCross(null)} className="ml-auto shrink-0 rounded-full border border-[#00e599]/40 px-2.5 py-1 text-[11px] text-[#00e599]">Фильтр: {cross.value} ✕</button>}
+        {editing && <button type="button" onClick={() => { const np = newPage(`Страница ${spec.pages.length + 1}`); change((s) => ({ ...s, pages: [...s.pages, np] })); setPageId(np.id); setSelectedId(null) }} aria-label="Добавить страницу" className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-fg/60 hover:bg-fg/10 hover:text-fg"><Plus className="h-4 w-4" /></button>}
+        {cross && <button type="button" onClick={() => setCross(null)} className="ml-auto shrink-0 rounded-full border border-accent/40 px-2.5 py-1 text-[11px] text-accent-ink">Фильтр: {cross.value} ✕</button>}
       </nav>
 
       {openList && <ReportsDialog orgId={orgId} onOpen={(id) => void open(id)} onClose={() => setOpenList(false)} onError={fail} />}

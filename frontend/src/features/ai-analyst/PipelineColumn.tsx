@@ -4,15 +4,15 @@ import type { Stage } from '../../lib/api/ai'
 import { EDGES, edgeState, STAGE_DEFS, STATUS_LABEL, statusMap, type NodeStatus } from './rag'
 
 const COLORS: Record<NodeStatus, { stroke: string; text: string; dot: string }> = {
-  idle: { stroke: '#292D30', text: '#666D73', dot: '#3a3e44' },
-  queued: { stroke: '#3a3e44', text: '#A0A5AA', dot: '#666D73' },
-  running: { stroke: '#35D6A0', text: '#F4F5F4', dot: '#35D6A0' },
-  completed: { stroke: '#1f6f55', text: '#E4F1EB', dot: '#35D6A0' },
-  warning: { stroke: '#8a6d2f', text: '#E5B95C', dot: '#E5B95C' },
-  failed: { stroke: '#a34f4f', text: '#E36D6D', dot: '#E36D6D' },
-  skipped: { stroke: '#1D2022', text: '#4d5358', dot: '#2a2e31' },
+  idle: { stroke: 'var(--color-border)', text: 'var(--color-muted)', dot: 'var(--color-border-strong)' },
+  queued: { stroke: 'var(--color-border-strong)', text: 'var(--color-text-soft)', dot: 'var(--color-muted)' },
+  running: { stroke: 'var(--color-accent)', text: 'var(--color-fg)', dot: 'var(--color-accent)' },
+  completed: { stroke: 'color-mix(in srgb, var(--color-accent) 45%, transparent)', text: 'var(--color-fg)', dot: 'var(--color-accent)' },
+  warning: { stroke: 'color-mix(in srgb, var(--color-warning) 55%, transparent)', text: 'var(--color-warning)', dot: 'var(--color-warning)' },
+  failed: { stroke: 'color-mix(in srgb, var(--color-danger) 55%, transparent)', text: 'var(--color-danger)', dot: 'var(--color-danger)' },
+  skipped: { stroke: 'var(--color-border)', text: 'color-mix(in srgb, var(--color-muted) 60%, transparent)', dot: 'var(--color-border)' },
 }
-const EDGE_COLOR = { idle: '#1D2022', active: '#35D6A0', done: '#1f6f55', muted: '#16191b' } as const
+const EDGE_COLOR = { idle: 'var(--color-border)', active: 'var(--color-accent)', done: 'color-mix(in srgb, var(--color-accent) 45%, transparent)', muted: 'color-mix(in srgb, var(--color-border) 60%, transparent)' } as const
 const H = 30
 
 const byId = Object.fromEntries(STAGE_DEFS.map((d) => [d.id, d]))
@@ -49,14 +49,14 @@ export function PipelineColumn({ stages, started, running, caption, durationMs, 
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Выполнение RAG</p>
           <p className="mt-1 truncate text-sm text-text-soft" title={caption}>{caption || 'Задайте вопрос — здесь появится путь запроса'}</p>
         </div>
-        <span className={`shrink-0 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider ${running ? 'border-accent/50 text-accent' : error ? 'border-danger/50 text-danger' : 'border-border text-muted'}`}>
+        <span className={`shrink-0 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider ${running ? 'border-accent/50 text-accent-ink' : error ? 'border-danger/50 text-danger' : 'border-border text-muted'}`}>
           {running ? 'идёт' : error ? 'ошибка' : started ? `готово · ${ms(durationMs)}` : 'ожидание'}
         </span>
       </header>
 
       {/* Desktop: SVG graph */}
       <div className="relative hidden min-h-0 flex-1 lg:block">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60" style={{ backgroundImage: 'repeating-linear-gradient(to right, rgb(255 255 255 / 4%) 0 1px, transparent 1px 44px)' }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60" style={{ backgroundImage: 'repeating-linear-gradient(to right, color-mix(in srgb, var(--color-fg) 4%, transparent) 0 1px, transparent 1px 44px)' }} />
         <svg viewBox="0 0 460 750" className="relative mx-auto h-full max-h-[760px] w-full" role="group" aria-label="Схема этапов RAG">
           <defs>
             <filter id="glow" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="3" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
@@ -88,7 +88,7 @@ export function PipelineColumn({ stages, started, running, caption, durationMs, 
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(active ? null : d.id) } }}
                 className="cursor-pointer outline-none [&:focus-visible>rect]:stroke-white"
               >
-                <rect x={d.x - d.w / 2} y={d.y - H / 2} width={d.w} height={H} rx={H / 2} fill="#101112" stroke={active ? '#F4F5F4' : c.stroke} strokeDasharray={status === 'skipped' ? '3 3' : undefined} filter={status === 'running' ? 'url(#glow)' : undefined} />
+                <rect x={d.x - d.w / 2} y={d.y - H / 2} width={d.w} height={H} rx={H / 2} fill="var(--color-surface-1)" stroke={active ? 'var(--color-fg)' : c.stroke} strokeDasharray={status === 'skipped' ? '3 3' : undefined} filter={status === 'running' ? 'url(#glow)' : undefined} />
                 <circle cx={d.x - d.w / 2 + 14} cy={d.y} r="3.2" fill={c.dot}>
                   {status === 'running' && <animate attributeName="opacity" values="1;0.25;1" dur="1.2s" repeatCount="indefinite" />}
                 </circle>
@@ -106,7 +106,7 @@ export function PipelineColumn({ stages, started, running, caption, durationMs, 
           return (
             <li key={d.id} className="flex items-start gap-3 rounded-[var(--radius-md)] border border-border-subtle px-3 py-2" data-status={status}>
               <span className="mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-full border" style={{ borderColor: COLORS[status].dot }}>
-                {status === 'completed' ? <Check className="h-2.5 w-2.5 text-accent" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full" style={{ background: COLORS[status].dot }} />}
+                {status === 'completed' ? <Check className="h-2.5 w-2.5 text-accent-ink" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full" style={{ background: COLORS[status].dot }} />}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="font-mono text-[11px]" style={{ color: COLORS[status].text }}>{d.label}</span>

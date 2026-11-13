@@ -57,7 +57,7 @@ export function FinancialReportsPage() {
               return (
                 <tr key={l.id} className="border-t border-border hover:bg-surface-2">
                   <td className={`px-4 py-2.5 ${l.bold ? 'font-semibold' : ''}`}>
-                    <button type="button" onClick={() => setLine(l)} className="inline-flex items-center gap-1.5 text-left hover:text-accent" aria-label={`Подробнее: ${l.label}`}>{l.label}<Info className="h-3 w-3 text-muted" aria-hidden /></button>
+                    <button type="button" onClick={() => setLine(l)} className="inline-flex items-center gap-1.5 text-left hover:text-accent-ink" aria-label={`Подробнее: ${l.label}`}>{l.label}<Info className="h-3 w-3 text-muted" aria-hidden /></button>
                   </td>
                   <td className="px-4 py-2.5 font-mono text-xs text-muted">{l.account || '—'}</td>
                   <td className={`tabular px-4 py-2.5 text-right ${l.bold ? 'font-semibold' : ''}`}>{mln(l.current)}</td>
